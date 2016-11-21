@@ -5,7 +5,7 @@
     xmlns:local="using:IPhoneNotifications"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" Loaded="Page_Loaded">
+    mc:Ignorable="d">
     <Page.Resources>
         <local:InvertConverter x:Key="InvertConverter"/>
         <DataTemplate x:Key="ResultsListViewTemplate" x:DataType="local:BluetoothLEDeviceDisplay">
@@ -42,7 +42,9 @@
                 in the next scenario.
             </TextBlock>
             <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
+                <Button x:Name="EnumerateButton" Content="Start enumerating" Click="{x:Bind EnumerateButton_Click}" Margin="0,0,10,0"/>
                 <Button x:Name="PairButton" Content="Pair" Click="{x:Bind PairButton_Click}" Margin="0,0,10,0" IsEnabled="{x:Bind ResultsListView.SelectedItem.(local:BluetoothLEDeviceDisplay.IsPaired), Converter={StaticResource InvertConverter}, FallbackValue=False, Mode=OneWay}" />
+                <Button x:Name="ConnectButton" Content="Connect" Click="{x:Bind ConnectButton_Click}" Margin="0,0,10,0" IsEnabled="{x:Bind ResultsListView.SelectedItem.(local:BluetoothLEDeviceDisplay.IsPaired), FallbackValue=False, Mode=OneWay}" />
             </StackPanel>
         </StackPanel>
         <ScrollViewer VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="1" Margin="0,10,0,0" BorderBrush="AntiqueWhite" BorderThickness="1">

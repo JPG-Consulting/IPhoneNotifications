@@ -95,6 +95,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="BluetoothLEAttributeDisplay.cs" />
     <Compile Include="BluetoothLEDeviceDisplay.cs" />
     <Compile Include="BluetoothServer.xaml.cs">
       <DependentUpon>BluetoothServer.xaml</DependentUpon>
@@ -104,6 +105,7 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">

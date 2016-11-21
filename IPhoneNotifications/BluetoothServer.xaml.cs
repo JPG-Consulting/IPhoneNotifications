@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Devices.Bluetooth;
 using Windows.Devices.Enumeration;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -41,15 +42,42 @@ namespace IPhoneNotifications
             StopBleDeviceWatcher();
 
             // Save the selected device's ID for use in other scenarios.
-            //var bleDeviceDisplay = ResultsListView.SelectedItem as BluetoothLEDeviceDisplay;
-            //if (bleDeviceDisplay != null)
-            //{
-            //    rootPage.SelectedBleDeviceId = bleDeviceDisplay.Id;
-            //    rootPage.SelectedBleDeviceName = bleDeviceDisplay.Name;
-            //}
+            var bleDeviceDisplay = ResultsListView.SelectedItem as BluetoothLEDeviceDisplay;
+            if (bleDeviceDisplay != null)
+            {
+                rootPage.SelectedBleDeviceId = bleDeviceDisplay.Id;
+                rootPage.SelectedBleDeviceName = bleDeviceDisplay.Name;
+            }
+        }
+
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            if (deviceWatcher == null)
+            {
+                StartBleDeviceWatcher();
+
+                rootPage.NotifyUser($"Device watcher started.", NotifyType.StatusMessage);
+            }
         }
 
         #region Device discovery
+
+        private void EnumerateButton_Click()
+        {
+            if (deviceWatcher == null)
+            {
+                StartBleDeviceWatcher();
+
+                rootPage.NotifyUser($"Device watcher started.", NotifyType.StatusMessage);
+            }
+            else
+            {
+                StopBleDeviceWatcher();
+
+                rootPage.NotifyUser($"Device watcher stopped.", NotifyType.StatusMessage);
+            }
+        }
 
         /// <summary>
         ///     Starts a device watcher that looks for all nearby BT devices (paired or unpaired). Attaches event handlers and
@@ -57,7 +85,7 @@ namespace IPhoneNotifications
         /// </summary>
         private void StartBleDeviceWatcher()
         {
-            //EnumerateButton.Content = "Stop enumerating";
+            EnumerateButton.Content = "Stop enumerating";
 
             // Additional properties we would like about the device.
             string[] requestedProperties = { "System.Devices.Aep.DeviceAddress", "System.Devices.Aep.IsConnected" };
@@ -77,7 +105,7 @@ namespace IPhoneNotifications
             deviceWatcher.Stopped += DeviceWatcher_Stopped;
 
             // Start over with an empty collection.
-            //ResultCollection.Clear();
+            ResultCollection.Clear();
 
             // Start the watcher.
             deviceWatcher.Start();
@@ -102,7 +130,7 @@ namespace IPhoneNotifications
                 deviceWatcher = null;
             }
 
-            //EnumerateButton.Content = "Start enumerating";
+            EnumerateButton.Content = "Start enumerating";
         }
 
         private async void DeviceWatcher_Added(DeviceWatcher sender, DeviceInformation deviceInfo)
@@ -233,9 +261,74 @@ namespace IPhoneNotifications
 
         #endregion
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
+        private readonly Guid _ancsServiceUiid = new Guid("7905F431-B5CE-4E99-A40F-4B1E122D00D0");
+        private readonly Guid _notificationSourceCharacteristicUuid = new Guid("9FBF120D-6301-42D9-8C58-25E699A21DBD");
+        private readonly Guid _controlPointCharacteristicUuid = new Guid("69D1D8F3-45E1-49A8-9821-9BBDFDAAD9D9");
+        private readonly Guid _dataSourceCharacteristicUuid = new Guid("22EAC6E9-24D6-4BB5-BE44-B36ACE7C7BFB");
+
+        private BluetoothLEDevice bluetoothLeDevice = null;
+
+        private ObservableCollection<BluetoothLEAttributeDisplay> ServiceCollection = new ObservableCollection<BluetoothLEAttributeDisplay>();
+
+
+        private void ClearBluetoothLEDevice()
         {
-            StartBleDeviceWatcher();
+            bluetoothLeDevice?.Dispose();
+            bluetoothLeDevice = null;
+        }
+
+        private async void ConnectButton_Click()
+        {
+            ConnectButton.IsEnabled = false;
+
+            ClearBluetoothLEDevice();
+            try
+            {
+                // BT_Code: BluetoothLEDevice.FromIdAsync must be called from a UI thread because it may prompt for consent.
+                var bleDeviceDisplay = ResultsListView.SelectedItem as BluetoothLEDeviceDisplay;
+                if (bleDeviceDisplay != null)
+                {
+                    rootPage.SelectedBleDeviceId = bleDeviceDisplay.Id;
+                    rootPage.SelectedBleDeviceName = bleDeviceDisplay.Name;
+                }
+
+                bluetoothLeDevice = await BluetoothLEDevice.FromIdAsync(rootPage.SelectedBleDeviceId);
+            }
+            catch (Exception ex) when ((uint)ex.HResult == 0x800710df)
+            {
+                // ERROR_DEVICE_NOT_AVAILABLE because the Bluetooth radio is not on.
+            }
+
+            if (bluetoothLeDevice != null)
+            {
+                var hasANCS = false;
+
+                // BT_Code: GattServices returns a list of all the supported services of the device.
+                // If the services supported by the device are expected to change
+                // during BT usage, subscribe to the GattServicesChanged event.
+                foreach (var service in bluetoothLeDevice.GattServices)
+                {
+                    if (service.Uuid == _ancsServiceUiid)
+                    {
+                        hasANCS = true;
+                    }
+                    //ServiceCollection.Add(new BluetoothLEAttributeDisplay(service));
+                    // 
+                }
+                //ConnectButton.Visibility = Visibility.Collapsed;
+                //ServiceList.Visibility = Visibility.Visible;
+                if (!hasANCS)
+                {
+                    ClearBluetoothLEDevice();
+                    rootPage.NotifyUser("ANCS service not found.", NotifyType.ErrorMessage);
+                }
+            }
+            else
+            {
+                ClearBluetoothLEDevice();
+                rootPage.NotifyUser("Failed to connect to device.", NotifyType.ErrorMessage);
+            }
+            ConnectButton.IsEnabled = true;
         }
     }
 }
