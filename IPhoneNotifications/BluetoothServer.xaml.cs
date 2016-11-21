@@ -268,9 +268,6 @@ namespace IPhoneNotifications
 
         private BluetoothLEDevice bluetoothLeDevice = null;
 
-        private ObservableCollection<BluetoothLEAttributeDisplay> ServiceCollection = new ObservableCollection<BluetoothLEAttributeDisplay>();
-
-
         private void ClearBluetoothLEDevice()
         {
             bluetoothLeDevice?.Dispose();
@@ -311,9 +308,8 @@ namespace IPhoneNotifications
                     if (service.Uuid == _ancsServiceUiid)
                     {
                         hasANCS = true;
+                        rootPage.NotifyUser("ANCS service found.", NotifyType.StatusMessage);
                     }
-                    //ServiceCollection.Add(new BluetoothLEAttributeDisplay(service));
-                    // 
                 }
                 //ConnectButton.Visibility = Visibility.Collapsed;
                 //ServiceList.Visibility = Visibility.Visible;
