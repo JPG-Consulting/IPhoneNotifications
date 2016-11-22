@@ -278,53 +278,23 @@ namespace IPhoneNotifications
         {
             ConnectButton.IsEnabled = false;
 
-            ClearBluetoothLEDevice();
             try
             {
                 // BT_Code: BluetoothLEDevice.FromIdAsync must be called from a UI thread because it may prompt for consent.
                 var bleDeviceDisplay = ResultsListView.SelectedItem as BluetoothLEDeviceDisplay;
                 if (bleDeviceDisplay != null)
                 {
-                    rootPage.SelectedBleDeviceId = bleDeviceDisplay.Id;
-                    rootPage.SelectedBleDeviceName = bleDeviceDisplay.Name;
+                    rootPage.ANCS.BluetoothLEDeviceId   = bleDeviceDisplay.Id;
+                    rootPage.ANCS.BluetoothLEDeviceName = bleDeviceDisplay.Name;
                 }
 
-                bluetoothLeDevice = await BluetoothLEDevice.FromIdAsync(rootPage.SelectedBleDeviceId);
+                rootPage.ANCS.Connect();
             }
-            catch (Exception ex) when ((uint)ex.HResult == 0x800710df)
+            catch (Exception ex)
             {
-                // ERROR_DEVICE_NOT_AVAILABLE because the Bluetooth radio is not on.
+                ConnectButton.IsEnabled = true;
+                rootPage.NotifyUser(ex.Message, NotifyType.ErrorMessage);
             }
-
-            if (bluetoothLeDevice != null)
-            {
-                var hasANCS = false;
-
-                // BT_Code: GattServices returns a list of all the supported services of the device.
-                // If the services supported by the device are expected to change
-                // during BT usage, subscribe to the GattServicesChanged event.
-                foreach (var service in bluetoothLeDevice.GattServices)
-                {
-                    if (service.Uuid == _ancsServiceUiid)
-                    {
-                        hasANCS = true;
-                        rootPage.NotifyUser("ANCS service found.", NotifyType.StatusMessage);
-                    }
-                }
-                //ConnectButton.Visibility = Visibility.Collapsed;
-                //ServiceList.Visibility = Visibility.Visible;
-                if (!hasANCS)
-                {
-                    ClearBluetoothLEDevice();
-                    rootPage.NotifyUser("ANCS service not found.", NotifyType.ErrorMessage);
-                }
-            }
-            else
-            {
-                ClearBluetoothLEDevice();
-                rootPage.NotifyUser("Failed to connect to device.", NotifyType.ErrorMessage);
-            }
-            ConnectButton.IsEnabled = true;
         }
     }
 }

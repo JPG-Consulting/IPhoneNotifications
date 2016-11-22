@@ -95,6 +95,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AppleNotificationCenterService.cs" />
     <Compile Include="BluetoothLEAttributeDisplay.cs" />
     <Compile Include="BluetoothLEDeviceDisplay.cs" />
     <Compile Include="BluetoothServer.xaml.cs">

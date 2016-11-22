@@ -30,6 +30,8 @@ namespace IPhoneNotifications
     {
         public static MainPage Current;
 
+        public AppleNotificationCenterService ANCS;
+
         public string SelectedBleDeviceId;
 
         public string SelectedBleDeviceName = "No device selected";
@@ -41,6 +43,8 @@ namespace IPhoneNotifications
             // This is a static public property that allows downstream pages to get a handle to the MainPage instance
             // in order to call methods that are in this class.
             Current = this;
+
+            ANCS = new AppleNotificationCenterService();
         }
 
         /// <summary>
