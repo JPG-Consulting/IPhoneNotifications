@@ -10,44 +10,13 @@ using Windows.Foundation;
 
 namespace IPhoneNotifications.AppleNotificationCenterService
 {
-    public enum CategoryId : byte
-    {
-        Other = 0,
-        IncomingCall = 1,
-        MissedCall = 2,
-        Voicemail = 3,
-        Social = 4,
-        Schedule = 5,
-        Email = 6,
-        News = 7,
-        HealthAndFitness = 8,
-        BusinessAndFinance = 9,
-        Location = 10,
-        Entertainment = 11
-        //Todo: reserved to 255
-    }
-
-    [Flags]
-    public enum EventFlags : byte
-    {
-        EventFlagSilent = 1 << 0,
-        EventFlagImportant = 1 << 1,
-        EventFlagPreExisting = 1 << 2,
-        EventFlagPositiveAction = 1 << 3,
-        EventFlagNegativeAction = 1 << 4,
-        Reserved1 = 1 << 5,
-        Reserved2 = 1 << 6,
-        Reserved3 = 1 << 7
-    }
-
-
     //https://developer.apple.com/library/ios/documentation/CoreBluetooth/Reference/AppleNotificationCenterServiceSpecification/Specification/Specification.html
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct NotificationSourceData
     {
-        public byte EventId;
+        public EventID EventId;
         public EventFlags EventFlags;
-        public CategoryId CategoryId;
+        public CategoryID CategoryId;
         public byte CategoryCount;
 
         public UInt32 NotificationUID;

@@ -50,6 +50,20 @@ namespace IPhoneNotifications.AppleNotificationCenterService
 
         public event Action<NotificationSourceData> ValueChanged;
 
+        private NotificationSourceData _NotificationSourceData;
+
+        public NotificationSourceData NotificationSourceData
+        {
+            get
+            {
+                return _NotificationSourceData;
+            }
+            set
+            {
+                _NotificationSourceData = value;
+            }
+        }
+
         public DataSource(GattCharacteristic characteristic)
         {
             GattCharacteristic = characteristic;
@@ -68,34 +82,21 @@ namespace IPhoneNotifications.AppleNotificationCenterService
         {
             await GattCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
         }
-
-        public async void GetNotificationData(NotificationSourceData notificationSourceData)
-        {
-            //Ask for more data through the control point characteristic
-            var attributes = new GetNotificationAttributesData
-            {
-                CommandId = 0x0,
-                NotificationUID = notificationSourceData.NotificationUID,
-                AttributeId1 = (byte)NotificationAttribute.Title,
-                AttributeId1MaxLen = 16,
-                AttributeId2 = (byte)NotificationAttribute.Message,
-                AttributeId2MaxLen = 32
-            };
-
-            var bytes = attributes.ToArray();
-
-            try
-            { 
-                var status = await GattCharacteristic.WriteValueAsync(bytes.AsBuffer(), GattWriteOption.WriteWithResponse);
-            }
-            catch (Exception)
-            {
-
-            }
-        }
-
+        
         private void GattCharacteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
         {
+            var stream = args.CharacteristicValue.AsStream();
+            var br = new BinaryReader(stream);
+
+            var cmdId = br.ReadByte();
+            var notUid = br.ReadUInt32();
+            var attr1 = (NotificationAttribute)br.ReadByte();
+            var attr1len = br.ReadUInt16();
+            var attr1val = br.ReadChars(attr1len);
+            var attr2 = (NotificationAttribute)br.ReadByte();
+            var attr2len = br.ReadUInt16();
+            var attr2val = br.ReadChars(attr2len);
+
             throw new NotImplementedException();
         }
     }

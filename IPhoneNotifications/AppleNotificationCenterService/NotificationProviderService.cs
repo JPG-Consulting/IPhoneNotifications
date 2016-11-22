@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace IPhoneNotifications.AppleNotificationCenterService
 {
@@ -57,40 +58,20 @@ namespace IPhoneNotifications.AppleNotificationCenterService
                 }
                 else
                 {
-                    //// Enum the characteristics for ANCS
-                    //IReadOnlyList<GattCharacteristic> characteristics = null;
-                    //try
-                    //{
-                    //    // BT_Code: Get all the child characteristics of a service.
-                    //    characteristics = NotificationProviderService.GetAllCharacteristics();
-                    //}
-                    //catch (Exception ex)
-                    //{
-                    //    throw new Exception("Restricted service. Can't read characteristics: " + ex.Message);
-                    //}
-
                     Guid notificationSourceUuid = new Guid("9FBF120D-6301-42D9-8C58-25E699A21DBD");
                     Guid controlPointUuid = new Guid("69D1D8F3-45E1-49A8-9821-9BBDFDAAD9D9");
                     Guid dataSourceUuid = new Guid("22EAC6E9-24D6-4BB5-BE44-B36ACE7C7BFB");
 
-                    NotificationSource = new NotificationSource( GattService.GetCharacteristics(notificationSourceUuid).First());
-                    ControlPoint       = GattService.GetCharacteristics(controlPointUuid).First();
-                    DataSource         = new DataSource(GattService.GetCharacteristics(dataSourceUuid).First());
-                    //foreach (GattCharacteristic c in characteristics)
-                    //{
-                    //    if (c.Uuid == notificationSourceUuid)
-                    //    {
-                    //        NotificationSource = c;
-                    //    }
-                    //    else if (c.Uuid == controlPointUuid)
-                    //    {
-                    //        ControlPoint = c;
-                    //    }
-                    //    else if (c.Uuid == dataSourceUuid)
-                    //    {
-                    //        DataSource = c;
-                    //    }
-                    //}
+                    try
+                    {
+                        NotificationSource = new NotificationSource(GattService.GetCharacteristics(notificationSourceUuid).First());
+                        ControlPoint = GattService.GetCharacteristics(controlPointUuid).First();
+                        DataSource = new DataSource(GattService.GetCharacteristics(dataSourceUuid).First());
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception(ex.Message);
+                    }
                 }
             }
             else
@@ -124,6 +105,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
 
             if (DataSource != null)
             {
+                //DataSource.ValueChanged -= DataSource_ValueChanged;
                 DataSource = null;
             }
 
@@ -182,10 +164,31 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             }
         }
 
-        private void NotificationSource_ValueChanged(NotificationSourceData obj)
+        private async void NotificationSource_ValueChanged(NotificationSourceData obj)
         {
+            DataSource.NotificationSourceData = obj;
             
-            throw new NotImplementedException();
+            //Ask for more data through the control point characteristic
+            var attributes = new GetNotificationAttributesData
+            {
+                CommandId = (byte)CommandID.GetNotificationAttributes,
+                NotificationUID = obj.NotificationUID,
+                AttributeId1 = (byte)NotificationAttribute.Title,
+                AttributeId1MaxLen = 16,
+                AttributeId2 = (byte)NotificationAttribute.Message,
+                AttributeId2MaxLen = 32
+            };
+
+            var bytes = attributes.ToArray();
+
+            try
+            {
+                var status = await ControlPoint.WriteValueAsync(bytes.AsBuffer(), GattWriteOption.WriteWithResponse);
+            }
+            catch (Exception)
+            {
+
+            }
         }
     }
 }

@@ -95,7 +95,10 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AppleNotificationCenterService\AppleNotificationEventArgs.cs" />
     <Compile Include="AppleNotificationCenterService\DataSource.cs" />
+    <Compile Include="AppleNotificationCenterService\Enums.cs" />
+    <Compile Include="AppleNotificationCenterService\NotificationData.cs" />
     <Compile Include="AppleNotificationCenterService\NotificationProviderService.cs" />
     <Compile Include="AppleNotificationCenterService\NotificationSource.cs" />
     <Compile Include="BluetoothLEAttributeDisplay.cs" />
