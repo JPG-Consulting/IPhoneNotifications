@@ -7,20 +7,20 @@ using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
-namespace IPhoneNotifications
+namespace IPhoneNotifications.AppleNotificationCenterService
 {
-    public class AppleNotificationCenterService
+    public class NotificationProviderService
     {
         public string BluetoothLEDeviceId;
         public string BluetoothLEDeviceName = "No device selected";
 
         private BluetoothLEDevice bluetoothLeDevice = null;
 
-        private GattDeviceService NotificationProviderService = null;
+        private GattDeviceService GattService = null;
 
-        public GattCharacteristic NotificationSource;
+        public NotificationSource NotificationSource;
         public GattCharacteristic ControlPoint;
-        public GattCharacteristic DataSource;
+        public DataSource DataSource;
         
         public async void Connect()
         {
@@ -43,7 +43,7 @@ namespace IPhoneNotifications
 
                 try
                 {
-                    NotificationProviderService = bluetoothLeDevice.GetGattService(ancsUuid);
+                    GattService = bluetoothLeDevice.GetGattService(ancsUuid);
                 }
                 catch (Exception ex)
                 {
@@ -51,7 +51,7 @@ namespace IPhoneNotifications
                 }
                 
 
-                if (NotificationProviderService == null)
+                if (GattService == null)
                 {
                     throw new Exception("Apple Notification Center Service not found.");
                 }
@@ -73,9 +73,9 @@ namespace IPhoneNotifications
                     Guid controlPointUuid = new Guid("69D1D8F3-45E1-49A8-9821-9BBDFDAAD9D9");
                     Guid dataSourceUuid = new Guid("22EAC6E9-24D6-4BB5-BE44-B36ACE7C7BFB");
 
-                    NotificationSource = NotificationProviderService.GetCharacteristics(notificationSourceUuid).First();
-                    ControlPoint       = NotificationProviderService.GetCharacteristics(controlPointUuid).First();
-                    DataSource         = NotificationProviderService.GetCharacteristics(dataSourceUuid).First();
+                    NotificationSource = new NotificationSource( GattService.GetCharacteristics(notificationSourceUuid).First());
+                    ControlPoint       = GattService.GetCharacteristics(controlPointUuid).First();
+                    DataSource         = new DataSource(GattService.GetCharacteristics(dataSourceUuid).First());
                     //foreach (GattCharacteristic c in characteristics)
                     //{
                     //    if (c.Uuid == notificationSourceUuid)
@@ -105,18 +105,11 @@ namespace IPhoneNotifications
             throw new NotImplementedException();
         }
 
-        private void NotificationSource_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
-        {
-            throw new NotImplementedException();
-        }
-
         private void ClearBluetoothLEDevice()
         {
-            if (NotificationProviderService != null)
-            {
-                NotificationProviderService?.Dispose();
-                NotificationProviderService = null;
-            }
+            GattService?.Dispose();
+            GattService = null;
+            
 
             if (ControlPoint != null)
             {
@@ -125,6 +118,7 @@ namespace IPhoneNotifications
 
             if (NotificationSource != null)
             {
+                NotificationSource.ValueChanged -= NotificationSource_ValueChanged;
                 NotificationSource = null;
             }
 
@@ -145,22 +139,22 @@ namespace IPhoneNotifications
             bluetoothLeDevice?.Dispose();
             bluetoothLeDevice = null;
         }
+        
 
         private async void BluetoothLeDevice_ConnectionStatusChanged(BluetoothLEDevice sender, object args)
         {
             if (sender.ConnectionStatus == Windows.Devices.Bluetooth.BluetoothConnectionStatus.Connected)
             {
+                //NotificationSource.ValueChanged += NotificationSource_ValueChanged;
                 NotificationSource.ValueChanged += NotificationSource_ValueChanged;
-                DataSource.ValueChanged += DataSource_ValueChanged;
-
 
                 if (NotificationSource.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Notify))
                 {
                     // Set the notify enable flag
                     try
                     {
-                        
-                        await NotificationSource.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+                        NotificationSource.Refresh();  
+                        //await NotificationSource.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
                     }
                     catch (Exception ex)
                     {
@@ -173,7 +167,7 @@ namespace IPhoneNotifications
                     // Set the notify enable flag
                     try
                     {
-                        await DataSource.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+                        DataSource.Refresh();
                     }
                     catch (Exception ex)
                     {
@@ -183,9 +177,15 @@ namespace IPhoneNotifications
             }
             else
             {
-                NotificationSource.ValueChanged -= NotificationSource_ValueChanged;
-                DataSource.ValueChanged -= DataSource_ValueChanged;
+                //NotificationSource.ValueChanged -= NotificationSource_ValueChanged;
+               // DataSource.ValueChanged -= DataSource_ValueChanged;
             }
+        }
+
+        private void NotificationSource_ValueChanged(NotificationSourceData obj)
+        {
+            
+            throw new NotImplementedException();
         }
     }
 }

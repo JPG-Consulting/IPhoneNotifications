@@ -12,6 +12,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using IPhoneNotifications.AppleNotificationCenterService;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -30,7 +31,7 @@ namespace IPhoneNotifications
     {
         public static MainPage Current;
 
-        public AppleNotificationCenterService ANCS;
+        public NotificationProviderService ANCS;
 
         public string SelectedBleDeviceId;
 
@@ -44,7 +45,7 @@ namespace IPhoneNotifications
             // in order to call methods that are in this class.
             Current = this;
 
-            ANCS = new AppleNotificationCenterService();
+            ANCS = new NotificationProviderService();
         }
 
         /// <summary>
