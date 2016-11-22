@@ -10,14 +10,6 @@ using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace IPhoneNotifications.AppleNotificationCenterService
 {
-    public enum NotificationAttribute : byte
-    {
-        AppIdentifier = 0x0,
-        Title = 0x1,
-        Subtitle = 0x2,
-        Message = 0x3
-    }
-
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct GetNotificationAttributesData
     {
@@ -90,10 +82,10 @@ namespace IPhoneNotifications.AppleNotificationCenterService
 
             var cmdId = br.ReadByte();
             var notUid = br.ReadUInt32();
-            var attr1 = (NotificationAttribute)br.ReadByte();
+            var attr1 = (NotificationAttributeID)br.ReadByte();
             var attr1len = br.ReadUInt16();
             var attr1val = br.ReadChars(attr1len);
-            var attr2 = (NotificationAttribute)br.ReadByte();
+            var attr2 = (NotificationAttributeID)br.ReadByte();
             var attr2len = br.ReadUInt16();
             var attr2val = br.ReadChars(attr2len);
 

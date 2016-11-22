@@ -173,9 +173,9 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             {
                 CommandId = (byte)CommandID.GetNotificationAttributes,
                 NotificationUID = obj.NotificationUID,
-                AttributeId1 = (byte)NotificationAttribute.Title,
+                AttributeId1 = (byte)NotificationAttributeID.Title,
                 AttributeId1MaxLen = 16,
-                AttributeId2 = (byte)NotificationAttribute.Message,
+                AttributeId2 = (byte)NotificationAttributeID.Message,
                 AttributeId2MaxLen = 32
             };
 
