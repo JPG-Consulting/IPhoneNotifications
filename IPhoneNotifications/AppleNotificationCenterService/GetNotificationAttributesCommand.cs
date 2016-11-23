@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Storage.Streams;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace IPhoneNotifications.AppleNotificationCenterService
 {
@@ -19,6 +21,26 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             CommandID = commandID;
             NotificationUID = notificationUID;
             Attributes = new List<NotificationAttribute>();
+        }
+
+        public GetNotificationAttributesCommand(IBuffer characteristicValue)
+        {
+            var stream = characteristicValue.AsStream();
+            var br = new BinaryReader(stream);
+
+            CommandID       = (CommandID)br.ReadByte();
+            NotificationUID = br.ReadUInt32();
+            Attributes = new List<NotificationAttribute>();
+
+            // Read Attributes
+            while (stream.Position < stream.Length)
+            {
+                NotificationAttributeID attributeID = (NotificationAttributeID)br.ReadByte();
+                UInt16 attributeLength = br.ReadUInt16();
+                String value = Encoding.UTF8.GetString(br.ReadBytes(attributeLength));
+
+                Attributes.Add(new NotificationAttribute(attributeID, value));
+            }
         }
 
         public byte[] ToArray()

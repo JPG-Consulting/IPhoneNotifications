@@ -49,5 +49,12 @@ namespace IPhoneNotifications.AppleNotificationCenterService
                 }
             }
         }
+
+        public NotificationAttribute(NotificationAttributeID attributeID, String value)
+        {
+            ID = attributeID;
+            _value = value;
+            Length = (UInt16)value.Length;
+        }
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Foundation;
 
 namespace IPhoneNotifications.AppleNotificationCenterService
 {
@@ -22,7 +23,9 @@ namespace IPhoneNotifications.AppleNotificationCenterService
         public NotificationSource NotificationSource;
         public GattCharacteristic ControlPoint;
         public DataSource DataSource;
-        
+
+        public event TypedEventHandler<NotificationProviderService, AppleNotificationEventArgs> NotificationReceived;
+
         public async void Connect()
         {
             ClearBluetoothLEDevice();
@@ -81,11 +84,6 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             }
         }
 
-        private void DataSource_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
-        {
-            throw new NotImplementedException();
-        }
-
         private void ClearBluetoothLEDevice()
         {
             GattService?.Dispose();
@@ -105,7 +103,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
 
             if (DataSource != null)
             {
-                //DataSource.ValueChanged -= DataSource_ValueChanged;
+                DataSource.NotificationAttributesReceived -= DataSource_NotificationAttributesReceived;
                 DataSource = null;
             }
 
@@ -129,6 +127,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             {
                 //NotificationSource.ValueChanged += NotificationSource_ValueChanged;
                 NotificationSource.ValueChanged += NotificationSource_ValueChanged;
+                DataSource.NotificationAttributesReceived += DataSource_NotificationAttributesReceived;
 
                 if (NotificationSource.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Notify))
                 {
@@ -164,14 +163,19 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             }
         }
 
+        private void DataSource_NotificationAttributesReceived(AppleNotificationEventArgs obj)
+        {
+            NotificationReceived?.Invoke(this, obj);
+        }
+
         private async void NotificationSource_ValueChanged(NotificationSourceData obj)
         {
             DataSource.NotificationSourceData = obj;
 
             var command = new GetNotificationAttributesCommand(CommandID.GetNotificationAttributes, obj.NotificationUID);
-            //command.Attributes.Add(new NotificationAttribute(NotificationAttributeID.AppIdentifier));
-            command.Attributes.Add(new NotificationAttribute(NotificationAttributeID.Title, 16));
-            command.Attributes.Add(new NotificationAttribute(NotificationAttributeID.Message, 32));
+            command.Attributes.Add(new NotificationAttribute(NotificationAttributeID.AppIdentifier));
+            command.Attributes.Add(new NotificationAttribute(NotificationAttributeID.Title, 64));
+            command.Attributes.Add(new NotificationAttribute(NotificationAttributeID.Message, 128));
             
             if (obj.EventFlags.HasFlag(EventFlags.EventFlagPositiveAction))
             {

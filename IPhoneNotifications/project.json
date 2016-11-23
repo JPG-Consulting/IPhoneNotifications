@@ -1,6 +1,8 @@
 ﻿{
   "dependencies": {
-    "Microsoft.NETCore.UniversalWindowsPlatform": "5.1.0"
+    "Microsoft.NETCore.UniversalWindowsPlatform": "5.1.0",
+    "Microsoft.Toolkit.Uwp.Notifications": "1.2.0",
+    "QueryString.NET": "1.0.0"
   },
   "frameworks": {
     "uap10.0": {}

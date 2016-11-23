@@ -13,6 +13,10 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using IPhoneNotifications.AppleNotificationCenterService;
+using Microsoft.Toolkit.Uwp.Notifications;
+using Windows.Data.Xml.Dom;
+using Microsoft.QueryStringDotNET;
+using Windows.UI.Notifications;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -46,6 +50,132 @@ namespace IPhoneNotifications
             Current = this;
 
             ANCS = new NotificationProviderService();
+            ANCS.NotificationReceived += ANCS_NotificationReceived;
+        }
+
+        private void ANCS_NotificationReceived(NotificationProviderService sender, AppleNotificationEventArgs args)
+        {
+            XmlDocument toastXml = null;
+
+            ToastVisual toastVisual = new ToastVisual()
+            {
+                BindingGeneric = new ToastBindingGeneric()
+                {
+                    Children = {
+                        new AdaptiveText()
+                        {
+                            Text = args.Title
+                        },
+                        new AdaptiveText
+                        {
+                            Text = args.Message
+                        }
+                    }
+                },
+            };
+
+            // toast actions
+            ToastActionsCustom toastActions = new ToastActionsCustom();
+
+            if (args.NotificationSource.EventFlags.HasFlag(EventFlags.EventFlagPositiveAction))
+            {
+                toastActions.Buttons.Add(new ToastButton(args.PositiveActionLabel, new QueryString() {
+                    {"action", "positive" },
+                    {"uid", args.NotificationAttributes.NotificationUID.ToString() }
+                }.ToString())
+                {
+                    ActivationType = ToastActivationType.Foreground
+                });
+            }
+
+            if (args.NotificationSource.EventFlags.HasFlag(EventFlags.EventFlagNegativeAction))
+            {
+                toastActions.Buttons.Add(new ToastButton(args.NegativeActionLabel, new QueryString() {
+                    {"action", "negative" },
+                    {"uid", args.NotificationAttributes.NotificationUID.ToString() }
+                }.ToString())
+                {
+                    ActivationType = ToastActivationType.Foreground
+                });
+            }
+
+            //switch (o.CategoryId)
+            //{
+            //    case CategoryId.IncomingCall:
+            //        //toastVisual.BindingGeneric.AppLogoOverride = new ToastGenericAppLogo() { Source = "Assets/iOS7_App_Icon_Phone.png" };
+            //        toastActions.Buttons.Add(new ToastButton("Answer", new QueryString() {
+            //            {"action", "positive"},
+            //            {"uid", o.Uid.ToString() }
+            //        }.ToString())
+            //        {
+            //            ActivationType = ToastActivationType.Foreground
+            //        });
+
+            //        //toastVisual.BindingGeneric.AppLogoOverride = new ToastGenericAppLogo() { Source = "Assets/iOS7_App_Icon_Phone.png" };
+            //        toastActions.Buttons.Add(new ToastButton("Dismiss", new QueryString() {
+            //            {"action", "negative"},
+            //            {"uid", o.Uid.ToString() }
+            //        }.ToString())
+            //        {
+            //            ActivationType = ToastActivationType.Foreground
+            //        });
+
+            //        break;
+            //    case CategoryId.MissedCall:
+            //        //toastVisual.BindingGeneric.AppLogoOverride = new ToastGenericAppLogo() { Source = "Assets/iOS7_App_Icon_Phone.png" };
+            //        toastActions.Buttons.Add(new ToastButton("Dial", new QueryString() {
+            //            {"action", "positive"},
+            //            {"uid", o.Uid.ToString() }
+            //        }.ToString())
+            //        {
+            //            ActivationType = ToastActivationType.Foreground
+            //        });
+
+            //        //toastVisual.BindingGeneric.AppLogoOverride = new ToastGenericAppLogo() { Source = "Assets/iOS7_App_Icon_Phone.png" };
+            //        toastActions.Buttons.Add(new ToastButton("Dismiss", new QueryString() {
+            //            {"action", "negative"},
+            //            {"uid", o.Uid.ToString() }
+            //        }.ToString())
+            //        {
+            //            ActivationType = ToastActivationType.Foreground
+            //        });
+            //        break;
+            //    case CategoryId.Voicemail:
+            //        //toastVisual.BindingGeneric.AppLogoOverride = new ToastGenericAppLogo() { Source = "Assets/iOS7_App_Icon_Phone.png" };
+            //        toastActions.Buttons.Add(new ToastButton("Dial", new QueryString() {
+            //            {"action", "positive"},
+            //            {"uid", o.Uid.ToString() }
+            //        }.ToString())
+            //        {
+            //            ActivationType = ToastActivationType.Foreground
+            //        });
+
+            //        toastActions.Buttons.Add(new ToastButtonDismiss());
+            //        break;
+            //    case CategoryId.Email:
+            //        //toastVisual.BindingGeneric.AppLogoOverride = new ToastGenericAppLogo() { Source = "Assets/iOS7_App_Icon_Email.png" };
+            //        toastActions.Buttons.Add(new ToastButtonDismiss());
+            //        break;
+            //    default:
+            //        toastActions.Buttons.Add(new ToastButtonDismiss());
+            //        break;
+            //}
+
+            ToastContent toastContent = new ToastContent()
+            {
+                Visual = toastVisual,
+                Scenario = ToastScenario.Default,
+                Actions = toastActions,
+            };
+
+            toastXml = toastContent.GetXml();
+
+            ToastNotification toastNotification = new ToastNotification(toastXml)
+            {
+                ExpirationTime = DateTime.Now.AddMinutes(5)
+            };
+
+            ToastNotificationManager.CreateToastNotifier().Show(toastNotification);
         }
 
         /// <summary>

@@ -40,7 +40,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
     {
         public readonly GattCharacteristic GattCharacteristic;
 
-        public event Action<NotificationSourceData> ValueChanged;
+        public event Action<AppleNotificationEventArgs> NotificationAttributesReceived;
 
         private NotificationSourceData _NotificationSourceData;
 
@@ -77,21 +77,45 @@ namespace IPhoneNotifications.AppleNotificationCenterService
         
         private void GattCharacteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
         {
-            var stream = args.CharacteristicValue.AsStream();
-            var br = new BinaryReader(stream);
+            CommandID commandID = (CommandID)args.CharacteristicValue.GetByte(0);
 
-            byte[] bytes = args.CharacteristicValue.ToArray();
+            if (commandID == CommandID.GetNotificationAttributes)
+            {
+                GetNotificationAttributesCommand reply = new GetNotificationAttributesCommand(args.CharacteristicValue);
 
-            var cmdId = br.ReadByte();
-            var notUid = br.ReadUInt32();
-            var attr1 = (NotificationAttributeID)br.ReadByte();
-            var attr1len = br.ReadUInt16();
-            var attr1val = br.ReadChars(attr1len);
-            var attr2 = (NotificationAttributeID)br.ReadByte();
-            var attr2len = br.ReadUInt16();
-            var attr2val = br.ReadChars(attr2len);
+                if (NotificationSourceData.NotificationUID == reply.NotificationUID)
+                {
+                    NotificationAttributesReceived?.Invoke(new AppleNotificationEventArgs(_NotificationSourceData, reply));
+                }
+                else
+                {
+                    var srcData = new NotificationSourceData
+                    {
+                        CategoryId = CategoryID.Other,
+                        NotificationUID = reply.NotificationUID,
+                        CategoryCount = 0,
+                        EventId = EventID.NotificationAdded
+                    };
+                    
+                    NotificationAttributesReceived?.Invoke(new AppleNotificationEventArgs(srcData, reply));
+                }
+                
+            }
+            
 
-            throw new NotImplementedException();
+            //var stream = args.CharacteristicValue.AsStream();
+            //var br = new BinaryReader(stream);
+
+            //byte[] bytes = args.CharacteristicValue.ToArray();
+
+            //var cmdId = br.ReadByte();
+            //var notUid = br.ReadUInt32();
+            //var attr1 = (NotificationAttributeID)br.ReadByte();
+            //var attr1len = br.ReadUInt16();
+            //var attr1val = br.ReadChars(attr1len);
+            //var attr2 = (NotificationAttributeID)br.ReadByte();
+            //var attr2len = br.ReadUInt16();
+            //var attr2val = br.ReadChars(attr2len);
         }
     }
 }
