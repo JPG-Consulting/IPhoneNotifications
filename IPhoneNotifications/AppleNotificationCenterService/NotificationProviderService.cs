@@ -26,6 +26,10 @@ namespace IPhoneNotifications.AppleNotificationCenterService
         public GattCharacteristic ControlPoint;
         public DataSource DataSource;
 
+        public event TypedEventHandler<NotificationProviderService, AppleNotificationEventArgs> NotificationAdded;
+        public event TypedEventHandler<NotificationProviderService, AppleNotificationEventArgs> NotificationModified;
+        public event TypedEventHandler<NotificationProviderService, AppleNotificationEventArgs> NotificationRemoved;
+
         public event TypedEventHandler<NotificationProviderService, AppleNotificationEventArgs> NotificationReceived;
         public static Action<IActivatedEventArgs> OnToastNotification = args => { };
         
@@ -196,7 +200,18 @@ namespace IPhoneNotifications.AppleNotificationCenterService
 
         private void DataSource_NotificationAttributesReceived(AppleNotificationEventArgs obj)
         {
-            NotificationReceived?.Invoke(this, obj);
+            switch (obj.NotificationSource.EventId)
+            {
+                case EventID.NotificationAdded:
+                    NotificationAdded?.Invoke(this, obj);
+                    break;
+                case EventID.NotificationModified:
+                    NotificationModified?.Invoke(this, obj);
+                    break;
+                case EventID.NotificationRemoved:
+                    NotificationRemoved?.Invoke(this, obj);
+                    break;
+            }
         }
 
         private async void NotificationSource_ValueChanged(NotificationSourceData obj)

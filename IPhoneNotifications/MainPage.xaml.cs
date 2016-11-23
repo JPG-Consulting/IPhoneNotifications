@@ -50,10 +50,10 @@ namespace IPhoneNotifications
             Current = this;
 
             ANCS = new NotificationProviderService();
-            ANCS.NotificationReceived += ANCS_NotificationReceived;
+            ANCS.NotificationAdded += ANCS_NotificationAdded;
         }
 
-        private void ANCS_NotificationReceived(NotificationProviderService sender, AppleNotificationEventArgs args)
+        private void ANCS_NotificationAdded(NotificationProviderService sender, AppleNotificationEventArgs args)
         {
             XmlDocument toastXml = null;
 
@@ -98,68 +98,6 @@ namespace IPhoneNotifications
                     ActivationType = ToastActivationType.Foreground
                 });
             }
-
-            //switch (o.CategoryId)
-            //{
-            //    case CategoryId.IncomingCall:
-            //        //toastVisual.BindingGeneric.AppLogoOverride = new ToastGenericAppLogo() { Source = "Assets/iOS7_App_Icon_Phone.png" };
-            //        toastActions.Buttons.Add(new ToastButton("Answer", new QueryString() {
-            //            {"action", "positive"},
-            //            {"uid", o.Uid.ToString() }
-            //        }.ToString())
-            //        {
-            //            ActivationType = ToastActivationType.Foreground
-            //        });
-
-            //        //toastVisual.BindingGeneric.AppLogoOverride = new ToastGenericAppLogo() { Source = "Assets/iOS7_App_Icon_Phone.png" };
-            //        toastActions.Buttons.Add(new ToastButton("Dismiss", new QueryString() {
-            //            {"action", "negative"},
-            //            {"uid", o.Uid.ToString() }
-            //        }.ToString())
-            //        {
-            //            ActivationType = ToastActivationType.Foreground
-            //        });
-
-            //        break;
-            //    case CategoryId.MissedCall:
-            //        //toastVisual.BindingGeneric.AppLogoOverride = new ToastGenericAppLogo() { Source = "Assets/iOS7_App_Icon_Phone.png" };
-            //        toastActions.Buttons.Add(new ToastButton("Dial", new QueryString() {
-            //            {"action", "positive"},
-            //            {"uid", o.Uid.ToString() }
-            //        }.ToString())
-            //        {
-            //            ActivationType = ToastActivationType.Foreground
-            //        });
-
-            //        //toastVisual.BindingGeneric.AppLogoOverride = new ToastGenericAppLogo() { Source = "Assets/iOS7_App_Icon_Phone.png" };
-            //        toastActions.Buttons.Add(new ToastButton("Dismiss", new QueryString() {
-            //            {"action", "negative"},
-            //            {"uid", o.Uid.ToString() }
-            //        }.ToString())
-            //        {
-            //            ActivationType = ToastActivationType.Foreground
-            //        });
-            //        break;
-            //    case CategoryId.Voicemail:
-            //        //toastVisual.BindingGeneric.AppLogoOverride = new ToastGenericAppLogo() { Source = "Assets/iOS7_App_Icon_Phone.png" };
-            //        toastActions.Buttons.Add(new ToastButton("Dial", new QueryString() {
-            //            {"action", "positive"},
-            //            {"uid", o.Uid.ToString() }
-            //        }.ToString())
-            //        {
-            //            ActivationType = ToastActivationType.Foreground
-            //        });
-
-            //        toastActions.Buttons.Add(new ToastButtonDismiss());
-            //        break;
-            //    case CategoryId.Email:
-            //        //toastVisual.BindingGeneric.AppLogoOverride = new ToastGenericAppLogo() { Source = "Assets/iOS7_App_Icon_Email.png" };
-            //        toastActions.Buttons.Add(new ToastButtonDismiss());
-            //        break;
-            //    default:
-            //        toastActions.Buttons.Add(new ToastButtonDismiss());
-            //        break;
-            //}
 
             ToastContent toastContent = new ToastContent()
             {

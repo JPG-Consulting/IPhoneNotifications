@@ -54,7 +54,6 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             }
 
             ValueChanged?.Invoke(dat);
-            //throw new NotImplementedException();
         }
 
         public async void Refresh()
