@@ -74,14 +74,14 @@ namespace IPhoneNotifications.AppleNotificationCenterService
                 else
                 {
                     Guid notificationSourceUuid = new Guid("9FBF120D-6301-42D9-8C58-25E699A21DBD");
-                    Guid controlPointUuid = new Guid("69D1D8F3-45E1-49A8-9821-9BBDFDAAD9D9");
-                    Guid dataSourceUuid = new Guid("22EAC6E9-24D6-4BB5-BE44-B36ACE7C7BFB");
+                    Guid controlPointUuid       = new Guid("69D1D8F3-45E1-49A8-9821-9BBDFDAAD9D9");
+                    Guid dataSourceUuid         = new Guid("22EAC6E9-24D6-4BB5-BE44-B36ACE7C7BFB");
 
                     try
                     {
+                        ControlPoint       = new ControlPoint(GattService.GetCharacteristics(controlPointUuid).First());
+                        DataSource         = new DataSource(GattService.GetCharacteristics(dataSourceUuid).First());
                         NotificationSource = new NotificationSource(GattService.GetCharacteristics(notificationSourceUuid).First());
-                        ControlPoint = new ControlPoint(GattService.GetCharacteristics(controlPointUuid).First());
-                        DataSource = new DataSource(GattService.GetCharacteristics(dataSourceUuid).First());
                     }
                     catch (Exception ex)
                     {
@@ -137,7 +137,6 @@ namespace IPhoneNotifications.AppleNotificationCenterService
         {
             if (sender.ConnectionStatus == Windows.Devices.Bluetooth.BluetoothConnectionStatus.Connected)
             {
-                //NotificationSource.ValueChanged += NotificationSource_ValueChanged;
                 DataSource.NotificationAttributesReceived += DataSource_NotificationAttributesReceived;
                 NotificationSource.ValueChanged += NotificationSource_ValueChanged;
 
@@ -148,8 +147,6 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             {
                 DataSource.NotificationAttributesReceived -= DataSource_NotificationAttributesReceived;
                 NotificationSource.ValueChanged -= NotificationSource_ValueChanged;
-               // NotificationSource.ValueChanged -= NotificationSource_ValueChanged;
-               // DataSource.ValueChanged -= DataSource_ValueChanged;
             }
         }
 
