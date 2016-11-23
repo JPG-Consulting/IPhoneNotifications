@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.QueryStringDotNET;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -30,6 +31,17 @@ namespace IPhoneNotifications
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+        }
+
+        protected override void OnActivated(IActivatedEventArgs activatedEventArgs)
+        {
+            base.OnActivated(activatedEventArgs);
+
+            // Handle toast activation
+            if (activatedEventArgs is ToastNotificationActivatedEventArgs)
+            {
+                AppleNotificationCenterService.NotificationProviderService.OnToastNotification(activatedEventArgs);
+            }
         }
 
         /// <summary>

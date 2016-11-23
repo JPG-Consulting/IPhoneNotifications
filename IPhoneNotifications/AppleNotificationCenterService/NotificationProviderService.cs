@@ -8,6 +8,8 @@ using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
+using Windows.ApplicationModel.Activation;
+using Microsoft.QueryStringDotNET;
 
 namespace IPhoneNotifications.AppleNotificationCenterService
 {
@@ -25,6 +27,12 @@ namespace IPhoneNotifications.AppleNotificationCenterService
         public DataSource DataSource;
 
         public event TypedEventHandler<NotificationProviderService, AppleNotificationEventArgs> NotificationReceived;
+        public static Action<IActivatedEventArgs> OnToastNotification = args => { };
+        
+        public NotificationProviderService()
+        {
+            OnToastNotification = OnToastNotificationReceived;
+        }
 
         public async void Connect()
         {
@@ -163,6 +171,29 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             }
         }
 
+        public async void OnToastNotificationReceived(IActivatedEventArgs e)
+        {
+            // Handle toast activation
+            if (e is ToastNotificationActivatedEventArgs)
+            {
+                var toastActivationArgs = e as ToastNotificationActivatedEventArgs;
+
+                // Parse the query string
+                QueryString args = QueryString.Parse(toastActivationArgs.Argument);
+
+                // See what action is being requested 
+                switch (args["action"])
+                {
+                    case "positive":
+                        SendPositiveAction(Convert.ToUInt32(args["uid"]));
+                        break;
+                    case "negative":
+                        SendNegativeAction(Convert.ToUInt32(args["uid"]));
+                        break;
+                }
+            }
+        }
+
         private void DataSource_NotificationAttributesReceived(AppleNotificationEventArgs obj)
         {
             NotificationReceived?.Invoke(this, obj);
@@ -211,6 +242,40 @@ namespace IPhoneNotifications.AppleNotificationCenterService
                 }
             }
             catch (Exception ex)
+            {
+
+            }
+        }
+
+        public async void SendPositiveAction(UInt32 notificationUID)
+        {
+            //Relay notification action back to device
+            var command = new NotificationActionData(CommandID.PerformNotificationAction, notificationUID, ActionID.Positive);
+
+            var bytes = command.ToArray();
+
+            try
+            {
+                var status = await ControlPoint.WriteValueAsync(bytes.AsBuffer(), GattWriteOption.WriteWithResponse);
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        public async void SendNegativeAction(UInt32 notificationUID)
+        {
+            //Relay notification action back to device
+            var command = new NotificationActionData(CommandID.PerformNotificationAction, notificationUID, ActionID.Negative);
+
+            var bytes = command.ToArray();
+
+            try
+            {
+                var status = await ControlPoint.WriteValueAsync(bytes.AsBuffer(), GattWriteOption.WriteWithResponse);
+            }
+            catch (Exception)
             {
 
             }
