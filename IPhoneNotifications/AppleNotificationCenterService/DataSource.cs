@@ -80,6 +80,8 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             var stream = args.CharacteristicValue.AsStream();
             var br = new BinaryReader(stream);
 
+            byte[] bytes = args.CharacteristicValue.ToArray();
+
             var cmdId = br.ReadByte();
             var notUid = br.ReadUInt32();
             var attr1 = (NotificationAttributeID)br.ReadByte();
