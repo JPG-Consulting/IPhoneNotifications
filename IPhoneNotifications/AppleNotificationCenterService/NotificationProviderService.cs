@@ -23,7 +23,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
         private GattDeviceService GattService = null;
 
         public NotificationSource NotificationSource;
-        public GattCharacteristic ControlPoint;
+        public ControlPoint ControlPoint;
         public DataSource DataSource;
 
         public event TypedEventHandler<NotificationProviderService, AppleNotificationEventArgs> NotificationAdded;
@@ -80,7 +80,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
                     try
                     {
                         NotificationSource = new NotificationSource(GattService.GetCharacteristics(notificationSourceUuid).First());
-                        ControlPoint = GattService.GetCharacteristics(controlPointUuid).First();
+                        ControlPoint = new ControlPoint(GattService.GetCharacteristics(controlPointUuid).First());
                         DataSource = new DataSource(GattService.GetCharacteristics(dataSourceUuid).First());
                     }
                     catch (Exception ex)
@@ -250,7 +250,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
 
             try
             {
-                var status = await ControlPoint.WriteValueAsync(bytes.AsBuffer(), GattWriteOption.WriteWithResponse);
+                var status = await ControlPoint.GattCharacteristic.WriteValueAsync(bytes.AsBuffer(), GattWriteOption.WriteWithResponse);
                 if (status == GattCommunicationStatus.Success)
                 {
                     // Raise an event?
@@ -271,7 +271,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
 
             try
             {
-                var status = await ControlPoint.WriteValueAsync(bytes.AsBuffer(), GattWriteOption.WriteWithResponse);
+                var status = await ControlPoint.GattCharacteristic.WriteValueAsync(bytes.AsBuffer(), GattWriteOption.WriteWithResponse);
             }
             catch (Exception)
             {
@@ -288,7 +288,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
 
             try
             {
-                var status = await ControlPoint.WriteValueAsync(bytes.AsBuffer(), GattWriteOption.WriteWithResponse);
+                var status = await ControlPoint.GattCharacteristic.WriteValueAsync(bytes.AsBuffer(), GattWriteOption.WriteWithResponse);
             }
             catch (Exception)
             {
