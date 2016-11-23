@@ -138,39 +138,17 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             if (sender.ConnectionStatus == Windows.Devices.Bluetooth.BluetoothConnectionStatus.Connected)
             {
                 //NotificationSource.ValueChanged += NotificationSource_ValueChanged;
-                NotificationSource.ValueChanged += NotificationSource_ValueChanged;
                 DataSource.NotificationAttributesReceived += DataSource_NotificationAttributesReceived;
+                NotificationSource.ValueChanged += NotificationSource_ValueChanged;
 
-                if (NotificationSource.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Notify))
-                {
-                    // Set the notify enable flag
-                    try
-                    {
-                        NotificationSource.Refresh();  
-                        //await NotificationSource.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine("Error: " + ex.Message);
-                    }
-                }
-
-                if (DataSource.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Notify))
-                { 
-                    // Set the notify enable flag
-                    try
-                    {
-                        DataSource.Refresh();
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine("Error: " + ex.Message);
-                    }
-                }
+                DataSource.SubscribeAsync();
+                NotificationSource.SubscribeAsync();
             }
             else
             {
-                //NotificationSource.ValueChanged -= NotificationSource_ValueChanged;
+                DataSource.NotificationAttributesReceived -= DataSource_NotificationAttributesReceived;
+                NotificationSource.ValueChanged -= NotificationSource_ValueChanged;
+               // NotificationSource.ValueChanged -= NotificationSource_ValueChanged;
                // DataSource.ValueChanged -= DataSource_ValueChanged;
             }
         }

@@ -56,7 +56,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             ValueChanged?.Invoke(dat);
         }
 
-        public async void Refresh()
+        public async void SubscribeAsync()
         {
             await GattCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
         }
