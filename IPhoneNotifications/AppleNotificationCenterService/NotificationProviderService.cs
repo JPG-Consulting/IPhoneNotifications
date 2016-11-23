@@ -189,10 +189,10 @@ namespace IPhoneNotifications.AppleNotificationCenterService
                 switch (args["action"])
                 {
                     case "positive":
-                        SendPositiveAction(Convert.ToUInt32(args["uid"]));
+                        ControlPoint.PerformNotificationActionAsync(Convert.ToUInt32(args["uid"]), ActionID.Positive);
                         break;
                     case "negative":
-                        SendNegativeAction(Convert.ToUInt32(args["uid"]));
+                        ControlPoint.PerformNotificationActionAsync(Convert.ToUInt32(args["uid"]), ActionID.Negative);
                         break;
                 }
             }
@@ -257,40 +257,6 @@ namespace IPhoneNotifications.AppleNotificationCenterService
                 }
             }
             catch (Exception ex)
-            {
-
-            }
-        }
-
-        public async void SendPositiveAction(UInt32 notificationUID)
-        {
-            //Relay notification action back to device
-            var command = new NotificationActionData(CommandID.PerformNotificationAction, notificationUID, ActionID.Positive);
-
-            var bytes = command.ToArray();
-
-            try
-            {
-                var status = await ControlPoint.GattCharacteristic.WriteValueAsync(bytes.AsBuffer(), GattWriteOption.WriteWithResponse);
-            }
-            catch (Exception)
-            {
-
-            }
-        }
-
-        public async void SendNegativeAction(UInt32 notificationUID)
-        {
-            //Relay notification action back to device
-            var command = new NotificationActionData(CommandID.PerformNotificationAction, notificationUID, ActionID.Negative);
-
-            var bytes = command.ToArray();
-
-            try
-            {
-                var status = await ControlPoint.GattCharacteristic.WriteValueAsync(bytes.AsBuffer(), GattWriteOption.WriteWithResponse);
-            }
-            catch (Exception)
             {
 
             }
