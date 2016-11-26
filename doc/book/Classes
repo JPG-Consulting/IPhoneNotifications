@@ -1,0 +1,35 @@
+# Attribute
+Should contain the main data for an Attribute (AppAttribute and NotificationAttribute)
+
+## AppAttribute and NotificationAttribute
+Should extends the base `Attribute` class.
+
+# Command
+
+All command start with a command ID followed by additional data. So a base class which must be extended comes handy here.
+
+This class could add a get data which would get all the data except the command ID.
+
+# NotificationCommand and ApplicationCommand
+
+Could extend the base `Command` class.
+
+# ControlPoint
+
+This controls a GattCharacteristic.
+
+# DataSource
+
+This controls a GattCharacteristic.
+
+# NotificationSource
+
+This controls a GattCharacteristic.
+
+# AppleNotificationCenterServiceClient
+
+Connects to the `Apple Notification Center Service`(Also known as ANCS) and handles intercommunication between the 
+GATT services. This should also raise the events to tell the main application about the notifications.
+
+As Apple suggests there will be a cache for Application attributes so we don't have to query all the time for
+the Application Attributes. Currently this 
