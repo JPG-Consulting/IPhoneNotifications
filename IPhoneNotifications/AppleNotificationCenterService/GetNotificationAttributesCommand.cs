@@ -14,7 +14,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
     {
         public CommandID CommandID;
         public UInt32 NotificationUID;
-        public List<NotificationAttribute> Attributes;
+        public readonly List<NotificationAttribute> Attributes;
 
         public GetNotificationAttributesCommand(CommandID commandID, UInt32 notificationUID)
         {
