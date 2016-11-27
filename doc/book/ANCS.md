@@ -33,7 +33,7 @@ The format of GATT notifications delivered through the Notification Source chara
 
 **Figure 2-1**  The format of a GATT notification delivered through a Notification Source characteristic
 
-![Figure 2-1](/images/formatOfGATTNotifications_2x.png)
+![Figure 2-1](images/formatOfGATTNotifications_2x.png)
 
 A GATT notification delivered through the Notification Source characteristic contains the following information:
 
@@ -47,7 +47,7 @@ The lifetime of an iOS notification can be implicitly deduced through the sequen
 
 **Figure 2-2**  The lifetime of an iOS notification
 
-![Figure 2-2](/images/lifetimeOfAnIOSNotification_2x.png)
+![Figure 2-2](images/lifetimeOfAnIOSNotification_2x.png)
 
 
 ### Control Point and Data Source
@@ -63,7 +63,7 @@ The Get Notification Attributes command allows an NC to retrieve the attributes 
 
 **Figure 2-3**  The format of a Get Notification Attribute command
 
-![Figure 2-3](/images/formatOfAGetNotificationAttributesCommand_2x.png)
+![Figure 2-3](images/formatOfAGetNotificationAttributesCommand_2x.png)
 
 A Get Notification Attributes command contains the following information:
 
@@ -75,7 +75,7 @@ The format of a response to a Get Notification Attributes command is shown in Fi
 
 **Figure 2-4**  The format of a response to a Get Notification Attributes command
 
-![Figure 2-4](/images/formatOfAResponseToAGetNotificationAttributesCommand_2x.png)
+![Figure 2-4](images/formatOfAResponseToAGetNotificationAttributesCommand_2x.png)
 
 A response to a Get Notification Attributes command contains the following information:
 
@@ -91,7 +91,7 @@ The Get App Attributes command allows an NC to retrieve attributes of a specific
 
 **Figure 2-5**  The format of a Get App Attributes command
 
-![Figure 2-5](/images/formatOfAGetAppAttributesCommand_2x.png)
+![Figure 2-5](images/formatOfAGetAppAttributesCommand_2x.png)
 
 A Get App Attributes command contains the following information:
 
@@ -103,7 +103,7 @@ The format of a response to a Get App Attributes command is shown in Figure 2-6.
 
 **Figure 2-6**  The format of a response to a Get App Attributes command
 
-![Figure 2-6](/images/formatOfAResponseToAGetAppAttributesCommand_2x.png)
+![Figure 2-6](images/formatOfAResponseToAGetAppAttributesCommand_2x.png)
 
 A response to a Get App Attributes command contains the following information:
 
@@ -174,9 +174,9 @@ The following two figures show examples of two common interactions between an NP
 
 **Figure 2-7**  Service setup example
 
-![Figure 2-7](/images/serviceSetupExample_2x.png)
+![Figure 2-7](images/serviceSetupExample_2x.png)
 
 **Figure 2-8**  Notification attribute retrieval example
 
-![Figure 2-8](/images/notificationAttributeRetrievalExample_2x.png)
+![Figure 2-8](images/notificationAttributeRetrievalExample_2x.png)
 
