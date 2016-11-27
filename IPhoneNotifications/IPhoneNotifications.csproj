@@ -102,7 +102,7 @@
     <Compile Include="AppleNotificationCenterService\GetNotificationAttributesCommand.cs" />
     <Compile Include="AppleNotificationCenterService\NotificationActionData.cs" />
     <Compile Include="AppleNotificationCenterService\NotificationAttribute.cs" />
-    <Compile Include="AppleNotificationCenterService\NotificationProviderService.cs" />
+    <Compile Include="AppleNotificationCenterService\NotificationConsumer.cs" />
     <Compile Include="AppleNotificationCenterService\NotificationSource.cs" />
     <Compile Include="BluetoothLEAttributeDisplay.cs" />
     <Compile Include="BluetoothLEDeviceDisplay.cs" />
