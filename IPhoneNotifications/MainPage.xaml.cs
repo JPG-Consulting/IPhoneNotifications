@@ -64,11 +64,11 @@ namespace IPhoneNotifications
                     Children = {
                         new AdaptiveText()
                         {
-                            Text = args.Title
+                            Text = args.NotificationAttributes[NotificationAttributeID.Title]
                         },
                         new AdaptiveText
                         {
-                            Text = args.Message
+                            Text = args.NotificationAttributes[NotificationAttributeID.Message]
                         }
                     }
                 },
@@ -79,7 +79,13 @@ namespace IPhoneNotifications
 
             if (args.NotificationSource.EventFlags.HasFlag(EventFlags.EventFlagPositiveAction))
             {
-                toastActions.Buttons.Add(new ToastButton(args.PositiveActionLabel, new QueryString() {
+                string positiveActionLabel = "Positive";
+                if (args.NotificationAttributes.ContainsKey(NotificationAttributeID.PositiveActionLabel))
+                {
+                    positiveActionLabel = args.NotificationAttributes[NotificationAttributeID.PositiveActionLabel];
+                }
+
+                toastActions.Buttons.Add(new ToastButton(positiveActionLabel, new QueryString() {
                     {"action", "positive" },
                     {"uid", args.NotificationAttributes.NotificationUID.ToString() }
                 }.ToString())
@@ -90,7 +96,13 @@ namespace IPhoneNotifications
 
             if (args.NotificationSource.EventFlags.HasFlag(EventFlags.EventFlagNegativeAction))
             {
-                toastActions.Buttons.Add(new ToastButton(args.NegativeActionLabel, new QueryString() {
+                string negativeActionLabel = "Negative";
+                if (args.NotificationAttributes.ContainsKey(NotificationAttributeID.NegativeActionLabel))
+                {
+                    negativeActionLabel = args.NotificationAttributes[NotificationAttributeID.NegativeActionLabel];
+                }
+
+                toastActions.Buttons.Add(new ToastButton(negativeActionLabel, new QueryString() {
                     {"action", "negative" },
                     {"uid", args.NotificationAttributes.NotificationUID.ToString() }
                 }.ToString())

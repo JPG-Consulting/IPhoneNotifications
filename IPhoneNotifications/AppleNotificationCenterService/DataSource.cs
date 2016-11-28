@@ -84,7 +84,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
                 case CommandID.GetAppAttributes:
                     break;
                 case CommandID.GetNotificationAttributes:
-                    GetNotificationAttributesCommand reply = new GetNotificationAttributesCommand(args.CharacteristicValue);
+                    NotificationAttributeCollection reply = new NotificationAttributeCollection(args.CharacteristicValue);
 
                     if (NotificationSourceData.NotificationUID == reply.NotificationUID)
                     {
@@ -92,15 +92,8 @@ namespace IPhoneNotifications.AppleNotificationCenterService
                     }
                     else
                     {
-                        var srcData = new NotificationSourceData
-                        {
-                            CategoryId = CategoryID.Other,
-                            NotificationUID = reply.NotificationUID,
-                            CategoryCount = 0,
-                            EventId = EventID.NotificationAdded
-                        };
-
-                        NotificationAttributesReceived?.Invoke(new AppleNotificationEventArgs(srcData, reply));
+                        System.Diagnostics.Debug.WriteLine("Missing data source notification.");
+                        throw new Exception("Missing data source notification");
                     }
                     break;
                 case CommandID.PerformNotificationAction:
