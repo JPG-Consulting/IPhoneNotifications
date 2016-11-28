@@ -189,15 +189,26 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             }
         }
 
+        /// <summary>
+        /// When the value is changed a new notification ha arrived. We need to send a query about notification
+        /// to the ControlPoint to get the actual notification message.
+        /// </summary>
+        /// <param name="obj"></param>
         private async void NotificationSource_ValueChanged(NotificationSourceData obj)
         {
+            // We don't care about old notifications
+            if (obj.EventFlags.HasFlag(EventFlags.EventFlagPreExisting))
+            {
+                return;
+            }
+
             // TODO: Check this out. Not sure why but sometime I get a Notification UID = 0
             //       which breaks everything.
             if (obj.NotificationUID == 0)
             {
                 return;
             }
-
+            
             DataSource.NotificationSourceData = obj;
 
             List<NotificationAttributeID> attributes = new List<NotificationAttributeID>();
