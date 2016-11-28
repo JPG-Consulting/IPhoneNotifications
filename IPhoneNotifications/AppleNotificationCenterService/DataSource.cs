@@ -10,32 +10,6 @@ using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace IPhoneNotifications.AppleNotificationCenterService
 {
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct GetNotificationAttributesData
-    {
-        public byte CommandId;
-        public UInt32 NotificationUID;
-        public byte AttributeId1;
-        public UInt16 AttributeId1MaxLen;
-        public byte AttributeId2;
-        public UInt16 AttributeId2MaxLen;
-
-        public byte[] ToArray()
-        {
-            var stream = new MemoryStream();
-            var writer = new BinaryWriter(stream);
-
-            writer.Write(this.CommandId);
-            writer.Write(this.NotificationUID);
-            writer.Write(this.AttributeId1);
-            writer.Write(this.AttributeId1MaxLen);
-            writer.Write(this.AttributeId2);
-            writer.Write(this.AttributeId2MaxLen);
-
-            return stream.ToArray();
-        }
-    }
-
     public class DataSource
     {
         public readonly GattCharacteristic GattCharacteristic;
