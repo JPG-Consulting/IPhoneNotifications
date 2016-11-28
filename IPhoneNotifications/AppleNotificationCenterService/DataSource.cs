@@ -40,21 +40,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
     {
         public readonly GattCharacteristic GattCharacteristic;
 
-        public event Action<AppleNotificationEventArgs> NotificationAttributesReceived;
-
-        private NotificationSourceData _NotificationSourceData;
-
-        public NotificationSourceData NotificationSourceData
-        {
-            get
-            {
-                return _NotificationSourceData;
-            }
-            set
-            {
-                _NotificationSourceData = value;
-            }
-        }
+        public event Action<NotificationAttributeCollection> NotificationAttributesReceived;
 
         public DataSource(GattCharacteristic characteristic)
         {
@@ -84,17 +70,9 @@ namespace IPhoneNotifications.AppleNotificationCenterService
                 case CommandID.GetAppAttributes:
                     break;
                 case CommandID.GetNotificationAttributes:
-                    NotificationAttributeCollection reply = new NotificationAttributeCollection(args.CharacteristicValue);
+                    NotificationAttributeCollection attributes = new NotificationAttributeCollection(args.CharacteristicValue);
 
-                    if (NotificationSourceData.NotificationUID == reply.NotificationUID)
-                    {
-                        NotificationAttributesReceived?.Invoke(new AppleNotificationEventArgs(_NotificationSourceData, reply));
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine("Missing data source notification.");
-                        throw new Exception("Missing data source notification");
-                    }
+                    NotificationAttributesReceived?.Invoke(attributes);
                     break;
                 case CommandID.PerformNotificationAction:
                     break;

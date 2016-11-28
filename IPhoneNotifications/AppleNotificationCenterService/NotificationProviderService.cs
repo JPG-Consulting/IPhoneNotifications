@@ -26,6 +26,8 @@ namespace IPhoneNotifications.AppleNotificationCenterService
         public ControlPoint ControlPoint;
         public DataSource DataSource;
 
+        private Dictionary<UInt32, NotificationSourceData> Notifications;
+
         public event TypedEventHandler<NotificationProviderService, AppleNotificationEventArgs> NotificationAdded;
         public event TypedEventHandler<NotificationProviderService, AppleNotificationEventArgs> NotificationModified;
         public event TypedEventHandler<NotificationProviderService, AppleNotificationEventArgs> NotificationRemoved;
@@ -35,6 +37,8 @@ namespace IPhoneNotifications.AppleNotificationCenterService
         
         public NotificationProviderService()
         {
+            Notifications = new Dictionary<UInt32, NotificationSourceData>();
+
             OnToastNotification = OnToastNotificationReceived;
         }
 
@@ -164,29 +168,40 @@ namespace IPhoneNotifications.AppleNotificationCenterService
                 switch (args["action"])
                 {
                     case "positive":
-                        ControlPoint.PerformNotificationActionAsync(Convert.ToUInt32(args["uid"]), ActionID.Positive);
+                        await ControlPoint.PerformNotificationActionAsync(Convert.ToUInt32(args["uid"]), ActionID.Positive);
                         break;
                     case "negative":
-                        ControlPoint.PerformNotificationActionAsync(Convert.ToUInt32(args["uid"]), ActionID.Negative);
+                        await ControlPoint.PerformNotificationActionAsync(Convert.ToUInt32(args["uid"]), ActionID.Negative);
                         break;
                 }
             }
         }
 
-        private void DataSource_NotificationAttributesReceived(AppleNotificationEventArgs obj)
+        private void DataSource_NotificationAttributesReceived(NotificationAttributeCollection attributes)
         {
-            switch (obj.NotificationSource.EventId)
+            // Is it a known notification?
+            if (Notifications.ContainsKey(attributes.NotificationUID) == false)
+            {
+                return;
+            }
+
+            NotificationSourceData sourceData = Notifications[attributes.NotificationUID];
+
+            switch (sourceData.EventId)
             {
                 case EventID.NotificationAdded:
-                    NotificationAdded?.Invoke(this, obj);
+                    NotificationAdded?.Invoke(this, new AppleNotificationEventArgs(sourceData, attributes));
                     break;
                 case EventID.NotificationModified:
-                    NotificationModified?.Invoke(this, obj);
+                    NotificationModified?.Invoke(this, new AppleNotificationEventArgs(sourceData, attributes));
                     break;
                 case EventID.NotificationRemoved:
-                    NotificationRemoved?.Invoke(this, obj);
+                    NotificationRemoved?.Invoke(this, new AppleNotificationEventArgs(sourceData, attributes));
                     break;
             }
+
+            // Remove the notification from the list
+            Notifications.Remove(sourceData.NotificationUID);
         }
 
         /// <summary>
@@ -208,9 +223,18 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             {
                 return;
             }
-            
-            DataSource.NotificationSourceData = obj;
 
+            // Store the notification
+            if (Notifications.ContainsKey(obj.NotificationUID))
+            {
+                Notifications[obj.NotificationUID] = obj;
+            }
+            else
+            {
+                Notifications.Add(obj.NotificationUID, obj);
+            }
+            
+            // Build the attributes list for the GetNotificationAttributtes command.   
             List<NotificationAttributeID> attributes = new List<NotificationAttributeID>();
             attributes.Add(NotificationAttributeID.AppIdentifier);
             attributes.Add(NotificationAttributeID.Title);
