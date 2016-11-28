@@ -96,6 +96,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="AppleNotificationCenterService\AppleNotificationEventArgs.cs" />
+    <Compile Include="AppleNotificationCenterService\ApplicationAttributeCollection.cs" />
     <Compile Include="AppleNotificationCenterService\NotifictionAttributeCollection.cs" />
     <Compile Include="AppleNotificationCenterService\ControlPoint.cs" />
     <Compile Include="AppleNotificationCenterService\DataSource.cs" />

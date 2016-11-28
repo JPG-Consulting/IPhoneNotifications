@@ -23,6 +23,8 @@ namespace IPhoneNotifications.AppleNotificationCenterService
         private async Task<GattCommunicationStatus> WriteValueAsync(IBuffer value)
         {
             // Send the command
+            byte[] debugValue = value.ToArray();
+
             try
             {
                 if (GattCharacteristic.CharacteristicProperties.HasFlag(GattCharacteristicProperties.ReliableWrites))
@@ -72,8 +74,8 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             var stream = new MemoryStream();
             var writer = new BinaryWriter(stream);
 
-            writer.Write((byte)CommandID.GetNotificationAttributes);
-            writer.Write(appIdentifier);
+            writer.Write((byte)CommandID.GetAppAttributes);
+            writer.Write(appIdentifier.ToArray());
             writer.Write((byte)0); // App identifier must be a null terminated string
 
             foreach (NotificationAttributeID attrID in attributeIDs)

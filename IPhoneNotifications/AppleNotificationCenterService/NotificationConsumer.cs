@@ -27,6 +27,9 @@ namespace IPhoneNotifications.AppleNotificationCenterService
         public DataSource DataSource;
 
         private Dictionary<UInt32, NotificationSourceData> Notifications;
+        private Dictionary<string, ApplicationAttributeCollection> Applications;
+        private Dictionary<string, Queue<NotificationAttributeCollection>> ApplicationNotificationQueue;
+        
 
         public event TypedEventHandler<NotificationConsumer, AppleNotificationEventArgs> NotificationAdded;
         public event TypedEventHandler<NotificationConsumer, AppleNotificationEventArgs> NotificationModified;
@@ -36,7 +39,9 @@ namespace IPhoneNotifications.AppleNotificationCenterService
         
         public NotificationConsumer()
         {
+            Applications = new Dictionary<string, ApplicationAttributeCollection>();
             Notifications = new Dictionary<UInt32, NotificationSourceData>();
+            ApplicationNotificationQueue = new Dictionary<string, Queue<NotificationAttributeCollection>>();
 
             OnToastNotification = OnToastNotificationReceived;
         }
@@ -140,6 +145,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
         {
             if (sender.ConnectionStatus == Windows.Devices.Bluetooth.BluetoothConnectionStatus.Connected)
             {
+                DataSource.ApplicationAttributesReceived += DataSource_ApplicationAttributesReceived;
                 DataSource.NotificationAttributesReceived += DataSource_NotificationAttributesReceived;
                 NotificationSource.ValueChanged += NotificationSource_ValueChanged;
 
@@ -148,6 +154,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             }
             else
             {
+                DataSource.ApplicationAttributesReceived -= DataSource_ApplicationAttributesReceived;
                 DataSource.NotificationAttributesReceived -= DataSource_NotificationAttributesReceived;
                 NotificationSource.ValueChanged -= NotificationSource_ValueChanged;
             }
@@ -176,14 +183,8 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             }
         }
 
-        private void DataSource_NotificationAttributesReceived(NotificationAttributeCollection attributes)
+        private void RaiseNotificationEvent(NotificationAttributeCollection attributes)
         {
-            // Is it a known notification?
-            if (Notifications.ContainsKey(attributes.NotificationUID) == false)
-            {
-                return;
-            }
-
             NotificationSourceData sourceData = Notifications[attributes.NotificationUID];
 
             switch (sourceData.EventId)
@@ -201,6 +202,72 @@ namespace IPhoneNotifications.AppleNotificationCenterService
 
             // Remove the notification from the list
             Notifications.Remove(sourceData.NotificationUID);
+        }
+
+        private void DataSource_ApplicationAttributesReceived(ApplicationAttributeCollection obj)
+        {
+            if (Applications.ContainsKey(obj.AppIdentifier))
+            {
+                Applications[obj.AppIdentifier] = obj;
+            }
+            else
+            {
+                Applications.Add(obj.AppIdentifier, obj);
+            }
+
+            if (ApplicationNotificationQueue.ContainsKey(obj.AppIdentifier))
+            {
+                Queue<NotificationAttributeCollection> queue = ApplicationNotificationQueue[obj.AppIdentifier];
+                while (queue.Count > 0)
+                {
+                    RaiseNotificationEvent(queue.Dequeue());
+                }
+
+                ApplicationNotificationQueue.Remove(obj.AppIdentifier);
+            }
+        }
+
+        private async void DataSource_NotificationAttributesReceived(NotificationAttributeCollection attributes)
+        {
+            // Is it a known notification?
+            if (Notifications.ContainsKey(attributes.NotificationUID) == false)
+            {
+                return;
+            }
+
+            ApplicationAttributeCollection applicationAttributes;
+
+            if (attributes.ContainsKey(NotificationAttributeID.AppIdentifier))
+            {
+                string appIdentifier = attributes[NotificationAttributeID.AppIdentifier];
+
+                if (Applications.ContainsKey(appIdentifier) == false)
+                {
+                    // Enque notifications
+                    if (ApplicationNotificationQueue.ContainsKey(appIdentifier) == false)
+                    {
+                        ApplicationNotificationQueue.Add(appIdentifier, new Queue<NotificationAttributeCollection>());
+                    }
+                    ApplicationNotificationQueue[appIdentifier].Enqueue(attributes);
+
+                    List<AppAttributeID> requestAppAttributes = new List<AppAttributeID>();
+                    requestAppAttributes.Add(AppAttributeID.DisplayName);
+
+                    try
+                    {
+                        var commStatus = await ControlPoint.GetAppAttributesAsync(attributes[NotificationAttributeID.AppIdentifier], requestAppAttributes);
+                    }
+                    catch (Exception e)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Bad get app attributes request");
+                    }
+                    return;
+                }
+
+                applicationAttributes = Applications[appIdentifier];
+            }
+
+            RaiseNotificationEvent(attributes);
         }
 
         /// <summary>

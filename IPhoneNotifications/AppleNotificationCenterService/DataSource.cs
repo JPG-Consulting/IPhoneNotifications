@@ -15,6 +15,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
         public readonly GattCharacteristic GattCharacteristic;
 
         public event Action<NotificationAttributeCollection> NotificationAttributesReceived;
+        public event Action<ApplicationAttributeCollection> ApplicationAttributesReceived;
 
         public DataSource(GattCharacteristic characteristic)
         {
@@ -49,6 +50,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             switch (commandID)
             {
                 case CommandID.GetAppAttributes:
+                    ApplicationAttributesReceived?.Invoke(new ApplicationAttributeCollection(args.CharacteristicValue));
                     break;
                 case CommandID.GetNotificationAttributes:
                     NotificationAttributesReceived?.Invoke(new NotificationAttributeCollection(args.CharacteristicValue));
