@@ -35,7 +35,7 @@ namespace IPhoneNotifications
     {
         public static MainPage Current;
 
-        public NotificationProviderService ANCS;
+        public NotificationConsumer ANCS;
 
         public string SelectedBleDeviceId;
 
@@ -49,11 +49,11 @@ namespace IPhoneNotifications
             // in order to call methods that are in this class.
             Current = this;
 
-            ANCS = new NotificationProviderService();
+            ANCS = new NotificationConsumer();
             ANCS.NotificationAdded += ANCS_NotificationAdded;
         }
 
-        private void ANCS_NotificationAdded(NotificationProviderService sender, AppleNotificationEventArgs args)
+        private void ANCS_NotificationAdded(NotificationConsumer sender, AppleNotificationEventArgs args)
         {
             XmlDocument toastXml = null;
 

@@ -40,7 +40,7 @@ namespace IPhoneNotifications
             // Handle toast activation
             if (activatedEventArgs is ToastNotificationActivatedEventArgs)
             {
-                AppleNotificationCenterService.NotificationProviderService.OnToastNotification(activatedEventArgs);
+                AppleNotificationCenterService.NotificationConsumer.OnToastNotification(activatedEventArgs);
             }
         }
 

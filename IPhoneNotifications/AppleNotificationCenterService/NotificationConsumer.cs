@@ -13,7 +13,7 @@ using Microsoft.QueryStringDotNET;
 
 namespace IPhoneNotifications.AppleNotificationCenterService
 {
-    public class NotificationProviderService
+    public class NotificationConsumer
     {
         public string BluetoothLEDeviceId;
         public string BluetoothLEDeviceName = "No device selected";
@@ -28,13 +28,13 @@ namespace IPhoneNotifications.AppleNotificationCenterService
 
         private Dictionary<UInt32, NotificationSourceData> Notifications;
 
-        public event TypedEventHandler<NotificationProviderService, AppleNotificationEventArgs> NotificationAdded;
-        public event TypedEventHandler<NotificationProviderService, AppleNotificationEventArgs> NotificationModified;
-        public event TypedEventHandler<NotificationProviderService, AppleNotificationEventArgs> NotificationRemoved;
+        public event TypedEventHandler<NotificationConsumer, AppleNotificationEventArgs> NotificationAdded;
+        public event TypedEventHandler<NotificationConsumer, AppleNotificationEventArgs> NotificationModified;
+        public event TypedEventHandler<NotificationConsumer, AppleNotificationEventArgs> NotificationRemoved;
 
         public static Action<IActivatedEventArgs> OnToastNotification = args => { };
         
-        public NotificationProviderService()
+        public NotificationConsumer()
         {
             Notifications = new Dictionary<UInt32, NotificationSourceData>();
 
