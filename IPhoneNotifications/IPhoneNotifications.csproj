@@ -100,7 +100,6 @@
     <Compile Include="AppleNotificationCenterService\DataSource.cs" />
     <Compile Include="AppleNotificationCenterService\Enums.cs" />
     <Compile Include="AppleNotificationCenterService\GetNotificationAttributesCommand.cs" />
-    <Compile Include="AppleNotificationCenterService\NotificationActionData.cs" />
     <Compile Include="AppleNotificationCenterService\NotificationAttribute.cs" />
     <Compile Include="AppleNotificationCenterService\NotificationProviderService.cs" />
     <Compile Include="AppleNotificationCenterService\NotificationSource.cs" />

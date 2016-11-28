@@ -7,6 +7,7 @@ using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using System.IO;
+using Windows.Storage.Streams;
 
 namespace IPhoneNotifications.AppleNotificationCenterService
 {
@@ -19,22 +20,44 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             GattCharacteristic = characteristic;
         }
 
-        public async void PerformNotificationActionAsync(UInt32 notificationUID, ActionID actionID)
+        private async Task<GattCommunicationStatus> WriteValueAsync(IBuffer value)
         {
-            GattCommunicationStatus status;
-
-            //Relay notification action back to device
-            NotificationActionData command = new NotificationActionData(CommandID.PerformNotificationAction, notificationUID, actionID);
-
-            var bytes = command.ToArray();
-
+            // Send the command
             try
             {
-                status = await GattCharacteristic.WriteValueAsync(bytes.AsBuffer(), GattWriteOption.WriteWithResponse);
+                if (GattCharacteristic.CharacteristicProperties.HasFlag(GattCharacteristicProperties.ReliableWrites))
+                {
+                    GattReliableWriteTransaction transaction = new GattReliableWriteTransaction();
+                    transaction.WriteValue(GattCharacteristic, value);
+                    return await transaction.CommitAsync();
+                }
+                else
+                {
+                    return await GattCharacteristic.WriteValueAsync(value, GattWriteOption.WriteWithResponse);
+                }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                switch ((uint)e.HResult)
+                {
+                    case 0xE04200A0:
+                        System.Diagnostics.Debug.WriteLine("Unknown command. The commandID was not recognized by the NP.");
+                        return GattCommunicationStatus.Success;
+                    case 0xE04200A1:
+                        System.Diagnostics.Debug.WriteLine("Invalid command. The command was improperly formatted.");
+                        return GattCommunicationStatus.Success;
+                    case 0xE04200A2:
+                        System.Diagnostics.Debug.WriteLine("Invalid parameter. One of the parameters (for example, the NotificationUID) does not refer to an existing object on the NP.");
+                        return GattCommunicationStatus.Success;
+                    case 0xE04200A3:
+                        System.Diagnostics.Debug.WriteLine("Action failed. The action was not performed.");
+                        return GattCommunicationStatus.Success;
+                    default:
+                        System.Diagnostics.Debug.WriteLine("Failed to get notification attributes. " + e.Message);
+                        break;
+                }
 
+                throw e;
             }
         }
 
@@ -63,38 +86,10 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             // Send the command
             try
             {
-                if (GattCharacteristic.CharacteristicProperties.HasFlag(GattCharacteristicProperties.ReliableWrites))
-                {
-                    GattReliableWriteTransaction transaction = new GattReliableWriteTransaction();
-                    transaction.WriteValue(GattCharacteristic, bytes.AsBuffer());
-                    return await transaction.CommitAsync();
-                }
-                else
-                {
-                    return await GattCharacteristic.WriteValueAsync(bytes.AsBuffer(), GattWriteOption.WriteWithResponse);
-                }
+                return await WriteValueAsync(bytes.AsBuffer());
             }
             catch (Exception e)
             {
-                switch ((uint)e.HResult)
-                {
-                    case 0xE04200A0:
-                        System.Diagnostics.Debug.WriteLine("Unknown command. The commandID was not recognized by the NP.");
-                        return GattCommunicationStatus.Success;
-                    case 0xE04200A1:
-                        System.Diagnostics.Debug.WriteLine("Invalid command. The command was improperly formatted.");
-                        return GattCommunicationStatus.Success;
-                    case 0xE04200A2:
-                        System.Diagnostics.Debug.WriteLine("Invalid parameter. One of the parameters (for example, the NotificationUID) does not refer to an existing object on the NP.");
-                        return GattCommunicationStatus.Success;
-                    case 0xE04200A3:
-                        System.Diagnostics.Debug.WriteLine("Action failed. The action was not performed.");
-                        return GattCommunicationStatus.Success;
-                    default:
-                        System.Diagnostics.Debug.WriteLine("Failed to get notification attributes. " + e.Message);
-                        break;
-                }
-
                 throw e;
             }
         }
@@ -140,38 +135,39 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             // Send the command
             try
             {
-                if (GattCharacteristic.CharacteristicProperties.HasFlag(GattCharacteristicProperties.ReliableWrites))
-                {
-                    GattReliableWriteTransaction transaction = new GattReliableWriteTransaction();
-                    transaction.WriteValue(GattCharacteristic, bytes.AsBuffer());
-                    return await transaction.CommitAsync();
-                }
-                else
-                {
-                    return await GattCharacteristic.WriteValueAsync(bytes.AsBuffer(), GattWriteOption.WriteWithResponse);
-                }
+                return await WriteValueAsync(bytes.AsBuffer());
             }
             catch (Exception e)
             {
-                switch ((uint)e.HResult)
-                {
-                    case 0xE04200A0:
-                        System.Diagnostics.Debug.WriteLine("Unknown command. The commandID was not recognized by the NP.");
-                        return GattCommunicationStatus.Success;
-                    case 0xE04200A1:
-                        System.Diagnostics.Debug.WriteLine("Invalid command. The command was improperly formatted.");
-                        return GattCommunicationStatus.Success;
-                    case 0xE04200A2:
-                        System.Diagnostics.Debug.WriteLine("Invalid parameter. One of the parameters (for example, the NotificationUID) does not refer to an existing object on the NP.");
-                        return GattCommunicationStatus.Success;
-                    case 0xE04200A3:
-                        System.Diagnostics.Debug.WriteLine("Action failed. The action was not performed.");
-                        return GattCommunicationStatus.Success;
-                    default:
-                        System.Diagnostics.Debug.WriteLine("Failed to get notification attributes. " + e.Message);
-                        break;
-                }
+                throw e;
+            }
+        }
 
+        /// <summary>
+        /// Starting with iOS 8.0, the NP can inform the NC of potential actions that are associated with iOS notifications. On the user’s behalf, the NC can then request the NP to perform an action associated with a specific iOS notification.
+        /// 
+        /// The NC is informed of the existence of performable actions on an iOS notification by detecting the presence of set flags in the EventFlags field of the GATT notifications generated by the Notification Source characteristic
+        /// </summary>
+        /// <param name="notificationUID">A 32-bit numerical value that is the unique identifier (UID) for the iOS notification on which to perform the action.</param>
+        /// <param name="actionID">The action identifier.</param>
+        /// <returns></returns>
+        public async Task<GattCommunicationStatus> PerformNotificationActionAsync(UInt32 notificationUID, ActionID actionID)
+        {
+            var stream = new MemoryStream();
+            var writer = new BinaryWriter(stream);
+
+            writer.Write((byte)CommandID.PerformNotificationAction);
+            writer.Write(notificationUID);
+            writer.Write((byte)actionID);
+
+            byte[] bytes = stream.ToArray();
+            
+            try
+            {
+                return await WriteValueAsync(bytes.AsBuffer());
+            }
+            catch (Exception e)
+            {
                 throw e;
             }
         }
