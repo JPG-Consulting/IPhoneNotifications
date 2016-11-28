@@ -58,7 +58,14 @@ namespace IPhoneNotifications.AppleNotificationCenterService
 
         public async void SubscribeAsync()
         {
-            await GattCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+            if (GattCharacteristic.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Notify))
+            {
+                await GattCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+            }
+            else
+            {
+                throw new Exception("Notification source characteristic does not have a notify property.");
+            }
         }
 
         private NotificationSourceData ByteArrayToNotificationSourceData(byte[] packet)
