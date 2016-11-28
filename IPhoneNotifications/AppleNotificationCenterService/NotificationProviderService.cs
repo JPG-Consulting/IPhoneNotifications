@@ -32,7 +32,6 @@ namespace IPhoneNotifications.AppleNotificationCenterService
         public event TypedEventHandler<NotificationProviderService, AppleNotificationEventArgs> NotificationModified;
         public event TypedEventHandler<NotificationProviderService, AppleNotificationEventArgs> NotificationRemoved;
 
-        public event TypedEventHandler<NotificationProviderService, AppleNotificationEventArgs> NotificationReceived;
         public static Action<IActivatedEventArgs> OnToastNotification = args => { };
         
         public NotificationProviderService()
