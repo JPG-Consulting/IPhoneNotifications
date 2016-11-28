@@ -191,49 +191,37 @@ namespace IPhoneNotifications.AppleNotificationCenterService
 
         private async void NotificationSource_ValueChanged(NotificationSourceData obj)
         {
+            // TODO: Check this out. Not sure why but sometime I get a Notification UID = 0
+            //       which breaks everything.
+            if (obj.NotificationUID == 0)
+            {
+                return;
+            }
+
             DataSource.NotificationSourceData = obj;
 
-            var command = new GetNotificationAttributesCommand(CommandID.GetNotificationAttributes, obj.NotificationUID);
-            command.Attributes.Add(new NotificationAttribute(NotificationAttributeID.AppIdentifier));
-            command.Attributes.Add(new NotificationAttribute(NotificationAttributeID.Title, 64));
-            command.Attributes.Add(new NotificationAttribute(NotificationAttributeID.Message, 128));
+            List<NotificationAttributeID> attributes = new List<NotificationAttributeID>();
+            attributes.Add(NotificationAttributeID.AppIdentifier);
+            attributes.Add(NotificationAttributeID.Title);
+            attributes.Add(NotificationAttributeID.Message);
             
             if (obj.EventFlags.HasFlag(EventFlags.EventFlagPositiveAction))
             {
-                command.Attributes.Add(new NotificationAttribute(NotificationAttributeID.PositiveActionLabel));
+                attributes.Add(NotificationAttributeID.PositiveActionLabel);
             }
 
             if (obj.EventFlags.HasFlag(EventFlags.EventFlagNegativeAction))
             {
-                command.Attributes.Add(new NotificationAttribute(NotificationAttributeID.NegativeActionLabel));
+                attributes.Add(NotificationAttributeID.NegativeActionLabel);
             }
-
-            var bytes = command.ToArray();
-
-            ////Ask for more data through the control point characteristic
-            //var attributes = new GetNotificationAttributesData
-            //{
-            //    CommandId = (byte)CommandID.GetNotificationAttributes,
-            //    NotificationUID = obj.NotificationUID,
-            //    AttributeId1 = (byte)NotificationAttributeID.Title,
-            //    AttributeId1MaxLen = 16,
-            //    AttributeId2 = (byte)NotificationAttributeID.Message,
-            //    AttributeId2MaxLen = 32
-            //};
-            
-            //var bytes2 = attributes.ToArray();
 
             try
             {
-                var status = await ControlPoint.GattCharacteristic.WriteValueAsync(bytes.AsBuffer(), GattWriteOption.WriteWithResponse);
-                if (status == GattCommunicationStatus.Success)
-                {
-                    // Raise an event?
-                }
+                var communicationStatus = await ControlPoint.GetNotificationAttributesAsync(obj.NotificationUID, attributes);
             }
             catch (Exception ex)
-            {
-
+            { 
+                // keep quiet...
             }
         }
     }
