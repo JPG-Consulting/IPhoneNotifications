@@ -37,12 +37,20 @@
         <SplitView x:Name="Splitter" IsPaneOpen="True" Grid.Column="1" DisplayMode="Inline" Grid.Row="1">
             <SplitView.Pane>
                 <RelativePanel HorizontalAlignment="Stretch" x:Name="NavRelativePanel">
-                    <RadioButton Tag="Bluetooth" Click="BluetoothButton_OnClick" Style="{StaticResource NavRadioButtonStyle}" Width="{Binding ElementName=NavRelativePanel,Path=ActualWidth}">
-                        <StackPanel Orientation="Horizontal">
-                            <SymbolIcon Symbol="CellPhone"/>
-                            <TextBlock Text="Bluetooth" Margin="12,0,0,0"/>
-                        </StackPanel>
-                    </RadioButton>
+                    <StackPanel Orientation="Vertical">
+                        <RadioButton Tag="Bluetooth" Click="BluetoothButton_OnClick" Style="{StaticResource NavRadioButtonStyle}" Width="{Binding ElementName=NavRelativePanel,Path=ActualWidth}">
+                            <StackPanel Orientation="Horizontal">
+                                <SymbolIcon Symbol="CellPhone"/>
+                                <TextBlock Text="Bluetooth" Margin="12,0,0,0"/>
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton Tag="Applications" Style="{StaticResource NavRadioButtonStyle}" Width="{Binding ElementName=NavRelativePanel,Path=ActualWidth}">
+                            <StackPanel Orientation="Horizontal">
+                                <SymbolIcon Symbol="CellPhone"/>
+                                <TextBlock Text="Applications" Margin="12,0,0,0"/>
+                            </StackPanel>
+                        </RadioButton>
+                    </StackPanel>
                 </RelativePanel>
             </SplitView.Pane>
             <RelativePanel>
