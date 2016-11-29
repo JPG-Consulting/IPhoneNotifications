@@ -70,7 +70,7 @@ namespace IPhoneNotifications
                         {
                             Text = args.NotificationAttributes[NotificationAttributeID.Message]
                         }
-                    }
+                    },
                 },
             };
 
@@ -122,7 +122,8 @@ namespace IPhoneNotifications
 
             ToastNotification toastNotification = new ToastNotification(toastXml)
             {
-                ExpirationTime = DateTime.Now.AddMinutes(5)
+                ExpirationTime = DateTime.Now.AddMinutes(5),
+                Tag = args.NotificationSource.NotificationUID.ToString()
             };
 
             ToastNotificationManager.CreateToastNotifier().Show(toastNotification);
