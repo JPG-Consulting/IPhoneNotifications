@@ -33,7 +33,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
 
         public event TypedEventHandler<NotificationConsumer, AppleNotificationEventArgs> NotificationAdded;
         public event TypedEventHandler<NotificationConsumer, AppleNotificationEventArgs> NotificationModified;
-        public event TypedEventHandler<NotificationConsumer, AppleNotificationEventArgs> NotificationRemoved;
+        public event TypedEventHandler<NotificationConsumer, NotificationSourceData> NotificationRemoved;
 
         public static Action<IActivatedEventArgs> OnToastNotification = args => { };
         
@@ -196,7 +196,8 @@ namespace IPhoneNotifications.AppleNotificationCenterService
                     NotificationModified?.Invoke(this, new AppleNotificationEventArgs(sourceData, attributes));
                     break;
                 case EventID.NotificationRemoved:
-                    NotificationRemoved?.Invoke(this, new AppleNotificationEventArgs(sourceData, attributes));
+                    // Has been handled, but just in case..
+                    NotificationRemoved?.Invoke(this, sourceData);
                     break;
             }
 
@@ -277,17 +278,23 @@ namespace IPhoneNotifications.AppleNotificationCenterService
         /// <param name="obj"></param>
         private async void NotificationSource_ValueChanged(NotificationSourceData obj)
         {
+            // TODO: Check this out. Not sure why but sometime I get a Notification UID = 0
+            //       which breaks everything.
+            if (obj.NotificationUID == 0)
+            {
+                return;
+            }
+
             // We don't care about old notifications
             if (obj.EventFlags.HasFlag(EventFlags.EventFlagPreExisting))
             {
                 return;
             }
 
-            // TODO: Check this out. Not sure why but sometime I get a Notification UID = 0
-            //       which breaks everything.
-            if (obj.NotificationUID == 0)
+            // Remove notifications don't need more data
+            if (obj.EventId == EventID.NotificationRemoved)
             {
-                return;
+                NotificationRemoved?.Invoke(this, obj);
             }
 
             // Store the notification

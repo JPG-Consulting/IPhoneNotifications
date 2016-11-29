@@ -51,6 +51,21 @@ namespace IPhoneNotifications
 
             ANCS = new NotificationConsumer();
             ANCS.NotificationAdded += ANCS_NotificationAdded;
+            ANCS.NotificationRemoved += ANCS_NotificationRemoved;
+        }
+
+        private void ANCS_NotificationRemoved(NotificationConsumer sender, NotificationSourceData args)
+        {
+            var toastHistory = ToastNotificationManager.History;
+
+            try
+            {
+                toastHistory.Remove(args.NotificationUID.ToString());
+            }
+            catch (Exception)
+            {
+                // Just be silent
+            }
         }
 
         private void ANCS_NotificationAdded(NotificationConsumer sender, AppleNotificationEventArgs args)
