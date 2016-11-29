@@ -51,8 +51,24 @@ namespace IPhoneNotifications.AppleNotificationCenterService
 
         public async void UnsubscribeAsync()
         {
-            // GattReadClientCharacteristicConfigurationDescriptorResult result = await GattCharacteristic.ReadClientCharacteristicConfigurationDescriptorAsync();
             RemoveValueChangedHandler();
+
+            try
+            {
+                var result = await
+                        GattCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
+                            GattClientCharacteristicConfigurationDescriptorValue.None);
+                if (result != GattCommunicationStatus.Success)
+                {
+                    System.Diagnostics.Debug.WriteLine("Error deregistering for notifications: {result}");
+                    // TODO: Error
+                    //rootPage.NotifyUser($"Error registering for notifications: {result}", NotifyType.ErrorMessage);
+                }
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+            }
         }
 
         public async void SubscribeAsync()
