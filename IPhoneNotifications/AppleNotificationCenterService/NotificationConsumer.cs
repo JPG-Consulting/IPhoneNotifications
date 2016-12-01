@@ -295,6 +295,7 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             if (obj.EventId == EventID.NotificationRemoved)
             {
                 NotificationRemoved?.Invoke(this, obj);
+                return;
             }
 
             // Store the notification
