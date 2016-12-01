@@ -149,8 +149,20 @@ namespace IPhoneNotifications.AppleNotificationCenterService
                 DataSource.NotificationAttributesReceived += DataSource_NotificationAttributesReceived;
                 NotificationSource.ValueChanged += NotificationSource_ValueChanged;
 
-                DataSource.SubscribeAsync();
-                NotificationSource.SubscribeAsync();
+                try
+                {
+                    DataSource.SubscribeAsync();
+                    NotificationSource.SubscribeAsync();
+                }
+                catch (Exception e)
+                {
+                    NotificationSource.UnsubscribeAsync();
+                    DataSource.UnsubscribeAsync();
+
+                    DataSource.ApplicationAttributesReceived -= DataSource_ApplicationAttributesReceived;
+                    DataSource.NotificationAttributesReceived -= DataSource_NotificationAttributesReceived;
+                    NotificationSource.ValueChanged -= NotificationSource_ValueChanged;
+                }
             }
             else
             {
@@ -294,6 +306,11 @@ namespace IPhoneNotifications.AppleNotificationCenterService
             // Remove notifications don't need more data
             if (obj.EventId == EventID.NotificationRemoved)
             {
+                if (Notifications.ContainsKey(obj.NotificationUID))
+                {
+                    Notifications.Remove(obj.NotificationUID);
+                }
+
                 NotificationRemoved?.Invoke(this, obj);
                 return;
             }
@@ -329,8 +346,9 @@ namespace IPhoneNotifications.AppleNotificationCenterService
                 var communicationStatus = await ControlPoint.GetNotificationAttributesAsync(obj.NotificationUID, attributes);
             }
             catch (Exception ex)
-            { 
-                // keep quiet...
+            {
+                // Simply log the exception to output console
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
         }
     }

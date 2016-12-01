@@ -96,6 +96,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="AppleNotificationCenterService\AppleNotificationEventArgs.cs" />
+    <Compile Include="AppleNotificationCenterService\Exceptions.cs" />
     <Compile Include="AppleNotificationCenterService\ApplicationAttributeCollection.cs" />
     <Compile Include="AppleNotificationCenterService\NotifictionAttributeCollection.cs" />
     <Compile Include="AppleNotificationCenterService\ControlPoint.cs" />
@@ -146,6 +147,7 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

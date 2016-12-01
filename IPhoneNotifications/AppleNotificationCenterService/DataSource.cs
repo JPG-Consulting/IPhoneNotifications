@@ -97,7 +97,8 @@ namespace IPhoneNotifications.AppleNotificationCenterService
                 }
                 catch (Exception e)
                 {
-                    System.Diagnostics.Debug.WriteLine(e.Message);
+                    RemoveValueChangedHandler();
+                    throw e;
                 }
             }
             else

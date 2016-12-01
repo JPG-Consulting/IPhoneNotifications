@@ -43,17 +43,17 @@ namespace IPhoneNotifications.AppleNotificationCenterService
                 switch ((uint)e.HResult)
                 {
                     case 0xE04200A0:
-                        System.Diagnostics.Debug.WriteLine("Unknown command. The commandID was not recognized by the NP.");
-                        return GattCommunicationStatus.Success;
+                        //System.Diagnostics.Debug.WriteLine("Unknown command. The commandID was not recognized by the NP.");
+                        throw new UnknownCommandException();
                     case 0xE04200A1:
-                        System.Diagnostics.Debug.WriteLine("Invalid command. The command was improperly formatted.");
-                        return GattCommunicationStatus.Success;
+                        //System.Diagnostics.Debug.WriteLine("Invalid command. The command was improperly formatted.");
+                        throw new InvalidCommandException();
                     case 0xE04200A2:
-                        System.Diagnostics.Debug.WriteLine("Invalid parameter. One of the parameters (for example, the NotificationUID) does not refer to an existing object on the NP.");
-                        return GattCommunicationStatus.Success;
+                        //System.Diagnostics.Debug.WriteLine("Invalid parameter. One of the parameters (for example, the NotificationUID) does not refer to an existing object on the NP.");
+                        throw new InvalidParameterException();
                     case 0xE04200A3:
-                        System.Diagnostics.Debug.WriteLine("Action failed. The action was not performed.");
-                        return GattCommunicationStatus.Success;
+                        //System.Diagnostics.Debug.WriteLine("Action failed. The action was not performed.");
+                        throw new ActionFailedException();
                     default:
                         System.Diagnostics.Debug.WriteLine("Failed to get notification attributes. " + e.Message);
                         break;
